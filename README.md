@@ -1,6 +1,9 @@
 ## Developing
 
-Install packages with `yarn add <package-name>` start a development server:
+First install yarn: `npm install yarn -g`
+Then install all local packages for the repo with the command `yarn` (same as `yarn install`).
+
+Add packages with `yarn add <package-name>` and start a development server:
 
 ```bash
 yarn dev
