@@ -1,2 +1,31 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<h1>Home</h1>
+
+<script lang="ts">
+	import { goto } from "$app/navigation";
+  import { auth, db } from "$lib/firebase/firebase";
+	import { getAdditionalUserInfo, type UserProfile } from "firebase/auth";
+  import { userStore } from 'sveltefire';
+
+  const user = userStore(auth);
+
+	function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
+    goto("/login")
+	}
+</script>
+
+{#if $user}
+  {#if $user.metadata.creationTime === $user.metadata.lastSignInTime}
+    <!-- new user -->
+    <p>Hi {$user.displayName}! Let's get those points rolling! 💪</p>
+  {:else}
+    <!-- existing user -->
+    <p>Welcome back {$user.displayName}!</p>
+  {/if}
+  <p>Your UserID is {$user.uid}</p>
+{:else}
+  <p>
+    Welcome to our prototype of a quiz application!
+    You are not logged in.
+  </p>
+  <button on:click={redirectLogin}>Let me in! 🚀</button>
+{/if}
