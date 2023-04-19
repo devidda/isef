@@ -16,8 +16,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 // Initialize Authentication
-const auth = getAuth(app);
+export const auth = getAuth(app);
 setPersistence(auth, browserSessionPersistence);
+
