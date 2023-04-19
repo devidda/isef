@@ -1,4 +1,10 @@
-<h1>Home</h1>
+<div class="container-background">
+    <div class="card text-black ">
+      <div class="card-header">
+        <h1>Home of the Quiz Application</h1>
+      </div>
+    </div>
+</div>
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
@@ -25,7 +31,7 @@
 {:else}
   <p>
     Welcome to our prototype of a quiz application!
-    You are not logged in.
+    <br>You are not logged in.
   </p>
-  <button on:click={redirectLogin}>Let me in! 🚀</button>
+  <button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
 {/if}
