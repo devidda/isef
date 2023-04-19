@@ -8,7 +8,6 @@ import {
 } from "firebase/auth";
 
 
-// called when logging in
 export async function login(
   event: SubmitEvent,
   email: string,
@@ -29,7 +28,6 @@ export async function login(
 }
 
 
-// called signing up
 export async function signup(
   event: SubmitEvent, 
   username: string,
@@ -38,7 +36,7 @@ export async function signup(
 ): Promise<void> {
   event.preventDefault()
   if (email == null)
-    console.log("Email is null!");
+   console.log("Email is null!");
   console.log(email);
   try {
     const userRecord = await createUserWithEmailAndPassword(
@@ -54,4 +52,10 @@ export async function signup(
     const typedError = error as Error
     console.error("Error logging in:", typedError.message);
   }
+}
+
+export async function signOut(
+  event: MouseEvent
+): Promise<void> {
+  auth.signOut();
 }
