@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-As [role] I want [function/wish], in order that [goal/benefit]
+As a [role] I want to [function/wish], in order that [goal/benefit]
 
 ### Estimated Effort
 
