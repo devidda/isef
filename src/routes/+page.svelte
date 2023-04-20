@@ -1,10 +1,8 @@
-<div class="container-background">
     <div class="card text-black ">
       <div class="card-header">
         <h1>Home of the Quiz Application</h1>
       </div>
     </div>
-</div>
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
