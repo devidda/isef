@@ -5,7 +5,7 @@
   import { auth, db } from "$lib/firebase/firebase";
 	import { getAdditionalUserInfo, type UserProfile } from "firebase/auth";
 	import { collection, getDocs } from "firebase/firestore";
-  import { userStore } from 'sveltefire';
+  import { userStore, Collection, FirebaseApp } from 'sveltefire';
 
 
   const user = userStore(auth);
@@ -36,6 +36,15 @@ let promise = getQuerySnapshot ();
 
   {/if}
   <p>Your UserID is {$user.uid}</p>
+
+  <FirebaseApp {auth} firestore={db}>
+    <Collection ref="quiz" let:data let:count>
+      <p> Here are {count} quiz questions:</p>
+      {#each data  as quiz}
+        {quiz.question}
+      {/each}
+    </Collection>
+  </FirebaseApp>
 {:else}
   <p>
     Welcome to our prototype of a quiz application!
