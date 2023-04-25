@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   getIdToken,
+  deleteUser,
 } from "firebase/auth";
 
 
@@ -34,23 +35,42 @@ export async function signup(
   email: string, 
   password: string 
 ): Promise<void> {
+
   event.preventDefault()
-  if (email == null)
-   console.log("Email is null!");
-  console.log(email);
+
   try {
+
+    // create new user in Firebase Auth
     const userRecord = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
+
+    // update username
     await updateProfile(userRecord.user, { displayName: username });
-    const idToken = await getIdToken(userRecord.user, true);
+
+    // call server function to add user to Firestore
+    const response = await fetch('/api/addUser', {
+        method: 'POST',
+        body: JSON.stringify(userRecord.user),
+        headers: {
+            'content-type': 'application/json'
+        }
+    });
+    const success = await response.json();
+
+    if (!response.ok || !success) {
+      deleteUser(userRecord.user)
+      throw new Error('Error creating new user in Firestore. Deleting new user...')
+    }
+
+    // if success, redirect to main page
     goto("/")
+
   } catch (error) {
-    // handle error
     const typedError = error as Error
-    console.error("Error logging in:", typedError.message);
+    console.error("Error signing up:", typedError.message);
   }
 }
 
