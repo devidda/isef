@@ -1,8 +1,7 @@
 import type { Timestamp } from 'firebase/firestore';
 
 interface user {
-	userID: string;
-	firstName: string;
+	username: string;
 	score: Number;
 }
 
