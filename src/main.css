@@ -1,0 +1,18 @@
+ @media (min-width: 576px) {
+    footer {
+      position: static;
+    }
+  } 
+  
+  @media (min-width: 768px) {
+    footer {
+      padding: 30px;
+    }
+  }
+  
+  @media (min-width: 992px) {
+    footer {
+      padding: 40px;
+      font-size: 16px;
+    }
+  } 
