@@ -2,6 +2,7 @@
   import { signOut } from "$lib/auth"
   import { auth } from "$lib/firebase/firebase";
   import { userStore } from "sveltefire";
+  import "$lib/main.css"
 
   const user = userStore(auth);
 </script>
