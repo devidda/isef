@@ -1,0 +1,31 @@
+.navbar {
+    top: 0px;
+    width: 100%;
+    z-index: 999;
+    margin-top: 0px;
+  }
+  
+footer {
+    background-color: white;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  } 
+@media (min-width: 576px) {
+    footer {
+      position: static;
+    }
+  }
+  
+ @media (min-width: 768px) {
+    footer {
+      padding: 30px;
+    }
+  }
+  
+ @media (min-width: 992px) {
+    footer {
+      padding: 40px;
+      font-size: 16px;
+    }
+  }
