@@ -6,10 +6,11 @@
 
 <script lang="ts">	
 	import { goto } from "$app/navigation";
-  	import { auth, db } from "$lib/firebase/firebase";
+	import { auth, db } from "$lib/firebase/firebase";
+	import Lobby from "./Lobby.svelte"
 
 	import { userStore, Collection, FirebaseApp, collectionStore } from 'sveltefire';
-	import type { user, stack, quiz, lobby, chatMessage } from "$lib/utils/db.d";
+	// import type { user, stack, quiz, lobby, chatMessage } from "$lib/utils/db.d";
 	
 	const user = userStore(auth);
 
@@ -50,3 +51,5 @@
   </p>
   <button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
 {/if}
+
+<Lobby/>

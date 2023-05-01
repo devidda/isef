@@ -27,6 +27,7 @@
 	"type": "module",
 	"dependencies": {
 		"firebase": "^9.19.1",
-		"sveltefire": "^0.2.3"
+		"sveltefire": "^0.2.3",
+		"sveltestrap": "^5.10.0"
 	}
 }
