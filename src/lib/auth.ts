@@ -25,6 +25,7 @@ export async function login(
   } catch (error) {
     const typedError = error as Error;
     console.error("Error logging in:", typedError.message);
+    alert("Error logging in: " + typedError.message);
   }
 }
 
