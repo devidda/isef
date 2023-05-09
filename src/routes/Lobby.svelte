@@ -3,7 +3,7 @@
   import { Button, ListGroup, ListGroupItem, FormGroup, Label, Input } from 'sveltestrap';
   import type { user, lobby } from '$lib/utils/db.d'
   import { auth, db } from '$lib/firebase/firebase'
-  import { Doc, Collection, FirebaseApp } from 'sveltefire';
+  import { Doc, Collection, FirebaseApp, User } from 'sveltefire';
 	import { derived, writable } from 'svelte/store';
 
   const gameModes: string[] = ['Singleplayer', 'Team Coop', 'Team Versus'];
@@ -13,26 +13,46 @@
 
   const selectedStacksAsString = derived(selectedStacks, $selectedStacks => $selectedStacks.join(', '));
 
-  const joinLobby = (selectedLobby: any) => {
-    lobbyID = selectedLobby.id;
+  const joinLobby = (selectedLobbyID: string) => {
+    lobbyID = selectedLobbyID;
   };
+
+  async function createOwnLobby(uid: string): Promise<void> {
+    try {
+      // call server function to add user to Firestore
+      const response = await fetch('/api/createLobby', {
+          method: 'POST',
+          body: JSON.stringify(uid),
+          headers: {
+              'content-type': 'application/json'
+          }
+      });
+      const success = await response.json();
+
+      if (response.ok && success) {
+        joinLobby(uid)
+      }
+    } catch (error) {
+      const typedError = error as Error
+      alert("Error setting up lobby: " +  typedError.message);
+    }
+  }
 </script>
 
 <FirebaseApp auth={auth} firestore={db}>
+<User let:user={loggedInUser}>
   {#if !lobbyID}
     <div class="pre-lobby-container">
-      <Button class="create-lobby-button" color="primary" on:click={() => console.log("Create Lobby button clicked")}>Create own game</Button>
+      <Button class="create-lobby-button" color="primary" on:click={() => createOwnLobby(loggedInUser.uid)}>Create own game</Button>
       <Collection ref={'lobby'} let:data={allLobbies} let:count={lobbyCount}>
         <p>There {lobbyCount === 1 ? 'is' : 'are'} {lobbyCount} {lobbyCount === 1 ? 'lobby' : 'lobbies'} available. Click to select:</p>
         <ListGroup>
           {#each allLobbies as lobby}
-            <Collection ref={`lobby/${lobby}/listOfUsers`} let:count={lobbyPlayerCount}>
-              <ListGroupItem on:click={() => joinLobby(lobby)}>
+              <ListGroupItem on:click={() => joinLobby(lobby.id)}>
                 {lobby.id}
                 Game Mode: {lobby.gameMode}
-                Player Count: {lobbyPlayerCount}
+                Player Count: {lobby.listOfUsers.length}
               </ListGroupItem>
-            </Collection>
           {/each}
         </ListGroup>
       </Collection>
@@ -41,18 +61,18 @@
     <div class="lobby-container">
       <Doc ref={`lobby/${lobbyID}`} let:data={activeLobby} let:ref={lobbyRef}>
         <div class="users-container">
-          <Collection ref={lobbyRef?.path + '/listOfUsers'} let:data={users} let:ref={usersRef}>
             {#if lobbyRef}
               <h1>Users in lobby:</h1>
               <ListGroup>
-                {#each users as user}
-                  <ListGroupItem>{user}</ListGroupItem>
+                {#each activeLobby.listOfUsers as joinedUser}
+                  <Doc ref={`user/${joinedUser}`} let:data={listedUser}>
+                    <ListGroupItem>{listedUser.username}</ListGroupItem>
+                  </Doc>
                 {/each}
               </ListGroup>
             {:else}
               <p>No lobby selected</p>
             {/if}
-          </Collection>
         </div>
         <div class="settings-container">
           <h1>Settings:</h1>
@@ -82,5 +102,6 @@
     </div>
     <Button class="start-game-button" color="primary" on:click={() => console.log("Start game button clicked")}>Start game</Button>
   {/if}
+</User>
 </FirebaseApp>
 
