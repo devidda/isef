@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import type { Config } from '@sveltejs/adapter-vercel';
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/firebase/firebase'
-import { setDoc, doc, deleteDoc } from '@firebase/firestore';
+import { doc, updateDoc, arrayUnion } from '@firebase/firestore';
 
 export const config: Config = {
   runtime: 'edge',
@@ -11,15 +11,18 @@ export const config: Config = {
 export const POST = (async ({ request }) => {
   try {
     // get data from request
-    const uid = await request.json();
+    const { uid, selectedLobbyID } = await request.json();
+    const lobby = doc(db, 'lobby', selectedLobbyID);
 
-    // add new user to firestore
-    await setDoc(doc(db, 'lobby', uid), {
-      gameMode: 'solo',
-      listOfUsers: [uid]
-    });
+    if (lobby) {
+      // add new user to existing lobby
+      await updateDoc(lobby, {
+        listOfUsers: arrayUnion(uid)
+      });
 
-    return json(uid);
+      return json(uid);
+    }
+    throw Error('Failed to join lobby. Lobby-reference or uid might be invalid.')
 
   } catch (error) {
     const typedError = error as Error;
