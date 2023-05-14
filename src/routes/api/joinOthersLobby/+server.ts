@@ -12,6 +12,9 @@ export const POST = (async ({ request }) => {
   try {
     // get data from request
     const { uid, selectedLobbyID } = await request.json();
+    if (!uid || !selectedLobbyID) {
+      throw new Error('One of the parameters has been failed to delivered!')
+    }
     const lobby = doc(db, 'lobby', selectedLobbyID);
 
     if (lobby) {

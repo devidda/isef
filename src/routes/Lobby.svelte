@@ -7,11 +7,13 @@
   const gameModes: string[] = ['Singleplayer', 'Team Coop', 'Team Versus'];
   let selectedMode: string = gameModes[0];
   let selectedStacks = writable<string[]>([]);
-  let lobbyID = '';
+
+  // the lobbyID variable affects if a lobby-menu or a list of available lobbies is displayed
+  let lobbyID = "";
 
   const selectedStacksAsString = derived(selectedStacks, $selectedStacks => $selectedStacks.join(', '));
 
-  async function joinLobby(uid: string, selectedLobbyID: string) {
+  async function joinLobby(uid: string, selectedLobbyID: string): Promise<void> {
     try {
       // call server function to add user to Firestore
       const response = await fetch('/api/joinOthersLobby', {
@@ -29,7 +31,7 @@
 
     } catch (error) {
       const typedError = error as Error
-      alert("Error setting up lobby: " +  typedError.message);
+      alert("Error joining lobby: " +  typedError.message);
     }
   };
 
@@ -53,6 +55,29 @@
       alert("Error setting up lobby: " +  typedError.message);
     }
   }
+
+
+	async function leaveLobby(uid: string): Promise<void> {
+    try {
+      console.log('lobbyID: ', lobbyID);
+      // call server function to add user to Firestore
+      const response = await fetch('/api/leaveLobby', {
+          method: 'POST',
+          body: JSON.stringify({ uid, lobbyID }),
+          headers: {
+              'content-type': 'application/json'
+          }
+      });
+      const success = await response.json();
+
+      if (response.ok && success) {
+        lobbyID = "";
+      }
+    } catch (error) {
+      const typedError = error as Error
+      alert("Error leaving lobby: " +  typedError.message);
+    }
+	}
 </script>
 
 <FirebaseApp auth={auth} firestore={db}>
@@ -116,7 +141,8 @@
           </div>
         </Doc>
       </div>
-      <Button class="start-game-button" color="primary" on:click={() => console.log("Start game button clicked")}>Start game</Button>
+      <Button class="start-game-button" color="primary" on:click={() => console.log("Start game button clicked")}>Start Game</Button>
+      <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
     {/if}
   </User>
 </FirebaseApp>

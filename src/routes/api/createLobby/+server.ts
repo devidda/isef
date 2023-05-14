@@ -12,6 +12,9 @@ export const POST = (async ({ request }) => {
   try {
     // get data from request
     const uid = await request.json();
+    if (!uid) {
+      throw new Error('Parameter has been failed to delivered!')
+    }
 
     // add new user to firestore
     await setDoc(doc(db, 'lobby', uid), {
