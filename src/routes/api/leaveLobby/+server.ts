@@ -11,12 +11,12 @@ export const config: Config = {
 export const POST = (async ({ request }) => {
   try {
     // get data from request
-    const { uid, lobbyID } = await request.json();
-    if (!uid || !lobbyID) {
+    const { uid, lobbyToLeaveID } = await request.json();
+    if (!uid || !lobbyToLeaveID ) {
       throw new Error('One of the parameters has been failed to delivered!')
     }
 
-    const lobbyReference = doc(db, 'lobby', lobbyID); 
+    const lobbyReference = doc(db, 'lobby', lobbyToLeaveID ); 
 
     if (lobbyReference) {
       // remove user from existing lobby
