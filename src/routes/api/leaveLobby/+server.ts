@@ -12,7 +12,6 @@ export const POST = (async ({ request }) => {
   try {
     // get data from request
     const { uid, lobbyID } = await request.json();
-    console.log('lobbytoleave: ', lobbyID);
     if (!uid || !lobbyID) {
       throw new Error('One of the parameters has been failed to delivered!')
     }

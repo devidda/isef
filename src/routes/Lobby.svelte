@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { afterUpdate, onMount } from 'svelte';
   import { Button, ListGroup, ListGroupItem, FormGroup, Label, Input } from 'sveltestrap';
   import { auth, db } from '$lib/firebase/firebase'
-  import { Doc, Collection, FirebaseApp, User } from 'sveltefire';
+  import { Doc, Collection, FirebaseApp, User, userStore } from 'sveltefire';
 	import { derived, writable } from 'svelte/store';
 
   const gameModes: string[] = ['Singleplayer', 'Team Coop', 'Team Versus'];
@@ -59,7 +60,6 @@
 
 	async function leaveLobby(uid: string): Promise<void> {
     try {
-      console.log('lobbyID: ', lobbyID);
       // call server function to add user to Firestore
       const response = await fetch('/api/leaveLobby', {
           method: 'POST',
@@ -80,6 +80,7 @@
 	}
 </script>
 
+<svelte:options accessors/>
 <FirebaseApp auth={auth} firestore={db}>
   <User let:user={loggedInUser}>
     {#if !lobbyID}
@@ -119,7 +120,7 @@
             <h1>Settings:</h1>
             <FormGroup>
               <Label for="gameModes">Game modes:</Label>
-              <Input type="select" name="gameModes" id="gameModes" bind:value={selectedMode}>
+              <Input type="select" name="gameModes" id="gameModes" bind:value={selectedMode} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}>
                 {#each gameModes as mode}
                   <option value={mode}>{mode}</option>
                 {/each}
@@ -131,7 +132,7 @@
                 {#each data as stack}
                   <ListGroupItem>
                     <Label>
-                      <Input type="checkbox" value={stack.name} bind:group={$selectedStacks} />
+                      <Input type="checkbox" value={stack.name} bind:group={$selectedStacks} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}/>
                       {stack.name}
                     </Label>
                   </ListGroupItem>
