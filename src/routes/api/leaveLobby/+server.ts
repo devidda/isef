@@ -35,7 +35,7 @@ export const POST = (async ({ request }) => {
         }
       }
 
-      return json(uid);
+      return json(true);
     }
     throw new Error('Failed to leave lobby.')
 

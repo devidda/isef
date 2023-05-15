@@ -1,18 +1,38 @@
 <script lang="ts">
-  import { afterUpdate, onMount } from 'svelte';
   import { Button, ListGroup, ListGroupItem, FormGroup, Label, Input } from 'sveltestrap';
   import { auth, db } from '$lib/firebase/firebase'
-  import { Doc, Collection, FirebaseApp, User, userStore } from 'sveltefire';
-	import { derived, writable } from 'svelte/store';
+  import { Doc, Collection, FirebaseApp, User } from 'sveltefire';
 
   const gameModes: string[] = ['Singleplayer', 'Team Coop', 'Team Versus'];
   let selectedMode: string = gameModes[0];
-  let selectedStacks = writable<string[]>([]);
+  let selectedStacks: string[] = [];
 
   // the lobbyID variable affects if a lobby-menu or a list of available lobbies is displayed
   let lobbyID = "";
 
-  const selectedStacksAsString = derived(selectedStacks, $selectedStacks => $selectedStacks.join(', '));
+
+  async function saveSettings(): Promise<void> {
+    try {
+      // call server function to update lobby settings in Firestore
+      const response = await fetch('/api/saveLobbySettings', {
+          method: 'POST',
+          body: JSON.stringify({ selectedMode, selectedStacks, lobbyID }),
+          headers: {
+              'content-type': 'application/json'
+          }
+      });
+      const success = await response.json();
+
+      if (response.ok && success) {
+        alert('Settings saved!');
+      };
+
+
+    } catch (error) {
+      const typedError = error as Error
+      alert("Error joining lobby: " +  typedError.message);
+    }
+  }
 
   async function joinLobby(uid: string, selectedLobbyID: string): Promise<void> {
     try {
@@ -28,6 +48,7 @@
 
       if (response.ok && success) {
         lobbyID = selectedLobbyID;
+        selectedStacks = [];
       };
 
     } catch (error) {
@@ -50,6 +71,7 @@
 
       if (response.ok && success) {
         lobbyID = uid;
+        selectedStacks = [];
       }
     } catch (error) {
       const typedError = error as Error
@@ -126,19 +148,29 @@
                 {/each}
               </Input>
             </FormGroup>
-            <p>Select quiz question stacks:</p>
-            <Collection ref={'stack'} let:data>
+            {#if activeLobby.listOfUsers[0] === loggedInUser.uid}
+              <p>Select quiz question stacks:</p>
+              <Collection ref={'stack'} let:data>
+                <ListGroup>
+                  {#each data as stack}
+                    <ListGroupItem>
+                      <Label>
+                        <input type="checkbox" value={stack.name} bind:group={selectedStacks} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}/>
+                        {stack.name}
+                      </Label>
+                    </ListGroupItem>
+                  {/each}
+                </ListGroup>
+              <Button class="start-game-button" color="primary" on:click={() => saveSettings()} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}>Save Settings</Button>
+              </Collection>
+            {:else}
+              <p>These Question Stacks are currently selected by the lobby owner:</p>
               <ListGroup>
-                {#each data as stack}
-                  <ListGroupItem>
-                    <Label>
-                      <Input type="checkbox" value={stack.name} bind:group={$selectedStacks} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}/>
-                      {stack.name}
-                    </Label>
-                  </ListGroupItem>
+                {#each activeLobby.questionStacks as qStack}
+                  <ListGroupItem>{qStack}</ListGroupItem>
                 {/each}
               </ListGroup>
-            </Collection>
+            {/if}
           </div>
         </Doc>
       </div>

@@ -22,7 +22,7 @@ export const POST = (async ({ request }) => {
       listOfUsers: [uid]
     });
 
-    return json(uid);
+    return json(true);
 
   } catch (error) {
     const typedError = error as Error;

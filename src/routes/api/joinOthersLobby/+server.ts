@@ -23,7 +23,7 @@ export const POST = (async ({ request }) => {
         listOfUsers: arrayUnion(uid)
       });
 
-      return json(uid);
+      return json(true);
     }
     throw Error('Failed to join lobby. Lobby-reference or uid might be invalid.')
 
