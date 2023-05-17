@@ -4,7 +4,7 @@
 
   let wantsToSignup: boolean = false;
 
-  function toggleLoginMode(event: MouseEvent) {
+  function toggleLoginMode() {
     wantsToSignup = !wantsToSignup;
   } 
 </script>
@@ -37,17 +37,3 @@
     </div>
   </body>
 </html>
-
-<style>
-  html,body {
-    height:100%;
-    width:100%;
-    margin:0;
-  }
-  body {
-    display:flex;
-  }
-  div {
-    margin:auto;
-  }
-</style>
