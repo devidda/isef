@@ -3,7 +3,8 @@
   import { auth } from "$lib/firebase/firebase";
   import { userStore } from "sveltefire";
   import "$lib/main.css"
-
+  //import { Route} from '@sveltejs/kit'; is this needed for the question creation
+  // import UserQuestion from '$lib/UserQuestion.svelte';
   const user = userStore(auth);
 </script>
 
@@ -20,6 +21,9 @@
       <li class="nav-item"> 
         <a class="nav-link" href="/login">Login</a>
       </li> 
+      <li class="nav-item">
+        <a class="nav-link" href="/manage">Create Your Own Question</a>
+      </li>
       {#if $user}
       <li class="nav-item">
         <button class="btn btn-outline-secondary" on:click={signOut}>Sign Out</button>
@@ -28,5 +32,9 @@
    </ul>
   </div>
 </nav>
+
+<!--<Route path="/user-question/:userID" let:params>
+  <UserQuestions {userID} />
+</Route> -->
 
 <slot></slot>
