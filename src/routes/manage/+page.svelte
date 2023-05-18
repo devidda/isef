@@ -100,10 +100,10 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         
         {#if $user !== null}
-            <p>Logged in as: {$user.usid}</p>
-            <p>With: {$user.email}</p>
+            <!--<p>Logged in as: {$user.usid}</p>-->
+            <p>Logged in as: {$user.email}</p>
         {:else}
-            <p>Not logged in</p>
+            <p>You are not logged in</p>
             <button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
         {/if}
 
@@ -130,10 +130,10 @@
               </FormGroup>
 
               {#if editingQuestion}
-                <Button type="submit" color="primary">Update Quiz Question</Button>
+                <Button type="submit" color="outline-secondary">Update Quiz Question</Button>
                 <Button on:click="{() => resetForm()}" color="secondary">Cancel</Button>
               {:else} 
-                <Button type="submit" color="primary">Create Quiz Question</Button>
+                <Button type="submit" color="outline-secondary">Create Quiz Question</Button>
               {/if} 
             </form>
           </main>
@@ -141,7 +141,7 @@
           <p>Please log in to create your own quiz questions.</p>
         {/if}
 
-        <button class="btn btn-light" on:click={redirectQuizList}>My Quiz Questions</button>
+        <button class="btn outline-secondary" on:click={redirectQuizList}>My Quiz Questions</button>
         <!--
           
         <button on:click={toggleShowMyQuestions}>My Questions</button>
