@@ -4,7 +4,7 @@
   import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
   //import MyQuestions from '.QuizList.svelte';
-  import { redirectQuizList } from './redirect.ts';
+  //import { redirectQuizList } from './redirect.ts';
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
   import "$lib/main.css";
@@ -13,9 +13,9 @@
     goto("/login")
 	}
 
-  function redirectQuizList(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
+ /*function redirectQuizList(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
     goto("/QuizList")
-	}
+	} */
 
   let showMyQuestions = false;
 
