@@ -1,5 +1,3 @@
-<!-- I tried seeing how the delete and edit of a use could be added but yeah because I'm doing sth wrong with the firestore its not working-->
-<script lang="ts">
     import { Button, FormGroup, Label, Input } from 'sveltestrap';
     import { collection, addDoc, doc, delete Doc, updateDoc } from 'firebase/firestore';
     import { db } from '$lib/firebase/firebase';
@@ -58,7 +56,7 @@
       editingQuestion = null;
     }
      
-      /*
+      
       try {
         const docRef = await addDoc(collection(db, 'QuizQuestions'), quizQuestionData);
         console.log('Quiz question got created with ID: ', docRef.id);
@@ -67,7 +65,7 @@
         console.error('Error while creating a quiz question: ', error);
         
       } 
-    }*/
+    }
 </script>
   
 <main>
