@@ -1,4 +1,4 @@
-<script>
+<script lang=ts>
     import { onMount } from 'svelte';
     import CreateQuizQuestion from './CreateQuizQuestion.svelte'; 
     import { collection, addDoc } from 'firebase/firestore';
