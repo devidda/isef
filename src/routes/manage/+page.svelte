@@ -7,9 +7,14 @@
   import { redirectQuizList } from './redirect.ts';
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
+  import "$lib/main.css";
 
   function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
     goto("/login")
+	}
+
+  function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
+    goto("/QuizList")
 	}
 
   let showMyQuestions = false;
