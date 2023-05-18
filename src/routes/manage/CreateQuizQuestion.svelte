@@ -90,10 +90,10 @@
       </FormGroup>
   
       {#if editingQuestion}
-        <Button type="submit" color="primary">Update Quiz Question</Button>
-        <Button on:click="{() => resetForm()}" color="secondary">Cancel</Button>
+        <button type="submit" color="primary">Update Quiz Question</Button>
+        <button on:click="{() => resetForm()}" color="secondary">Cancel</Button>
       {:else}
-        <Button type="submit" color="primary">Create Quiz Question</Button>
+        <button type="submit" color="primary">Create Quiz Question</Button>
       {/if}
     </form>
 </main>
