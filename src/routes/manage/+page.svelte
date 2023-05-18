@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { user } from 'sveltefire/auth';
+  import { auth, db } from "$lib/firebase/firebase";
+  import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-  import { db } from '$lib/firebase/firebase';
-  import { onMount } from 'svelte';
+  
+  // Import Sveltestrap components
+  import { Button, FormGroup, Label, Input } from 'sveltestrap';
 
   let userId = 'USER_ID';
 
@@ -59,7 +61,6 @@
     correctAnswer = 0;
     editingQuestion = null;
   }
-
 </script>
 
 <html lang="en">
@@ -75,28 +76,28 @@
             <h1>Create and Edit your own Quiz Questions</h1>
 
             <form on:submit|preventDefault="{createQuizQuestion}">
-              <formGroup>
-                <label for="question">Question:</label>
-                <input type="text" id="question" bind:value="{question}" />
-              </formGroup>
+              <FormGroup>
+                <Label for="question">Question:</Label>
+                <Input type="text" id="question" bind:value="{question}" />
+              </FormGroup>
 
               {#each options as option, index}
-                <formGroup>
-                  <label for="{`option${index}`}">Option {index + 1}:</label>
-                  <input type="text" id="{`option${index}`}" bind:value="{options[index]}" />
-                </formGroup>
+                <FormGroup>
+                  <Label for="{`option${index}`}">Option {index + 1}:</Label>
+                  <Input type="text" id="{`option${index}`}" bind:value="{options[index]}" />
+                </FormGroup>
               {/each}
 
-              <formGroup>
-                <label for="correctAnswer">Correct Answer:</label>
-                <input type="number" id="correctAnswer" bind:value="{correctAnswer}" />
-              </formGroup>
+              <FormGroup>
+                <Label for="correctAnswer">Correct Answer:</Label>
+                <Input type="number" id="correctAnswer" bind:value="{correctAnswer}" />
+              </FormGroup>
 
               {#if editingQuestion}
-                <button type="submit" color="primary">Update Quiz Question</button>
-                <button on:click="{() => resetForm()}" color="secondary">Cancel</button>
+                <Button type="submit" color="primary">Update Quiz Question</Button>
+                <Button on:click="{() => resetForm()}" color="secondary">Cancel</Button>
               {:else}
-                <button type="submit" color="primary">Create Quiz Question</button>
+                <Button type="submit" color="primary">Create Quiz Question</Button>
               {/if}
             </form>
           </main>

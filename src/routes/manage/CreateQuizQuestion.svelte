@@ -1,4 +1,4 @@
-    import { Button, FormGroup, Label, Input } from 'sveltestrap';
+    <!--import { Button, FormGroup, Label, Input } from 'sveltestrap';
     import { collection, addDoc, doc, delete Doc, updateDoc } from 'firebase/firestore';
     import { db } from '$lib/firebase/firebase';
   
@@ -98,8 +98,4 @@
     </form>
 </main>
   
-  <!-- we got a style sheet and bootstrap so this might not be needed -->
-<style>
-    
-</style>
-  
+-->

@@ -3,8 +3,7 @@
   import { auth } from "$lib/firebase/firebase";
   import { userStore } from "sveltefire";
   import "$lib/main.css"
-  //import { Route} from '@sveltejs/kit'; is this needed for the question creation
-  // import UserQuestion from '$lib/UserQuestion.svelte';
+
   const user = userStore(auth);
 </script>
 
@@ -32,9 +31,5 @@
    </ul>
   </div>
 </nav>
-
-<!--<Route path="/user-question/:userID" let:params>
-  <UserQuestions {userID} />
-</Route> -->
 
 <slot></slot>
