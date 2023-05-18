@@ -3,7 +3,7 @@
   import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
   //import MyQuestions from '.QuizList.svelte';
-
+  import { redirectQuizList } from './redirect.ts';
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
 
@@ -130,8 +130,7 @@
           <p>Please log in to create your own quiz questions.</p>
         {/if}
 
-        <Button href="/QuizList" color="primary">My Quiz Questions</Button>
-        
+        <button class="btn btn-light" on:click={redirectQuizList}>My Quiz Questions</button>
         <!--
           
         <button on:click={toggleShowMyQuestions}>My Questions</button>
