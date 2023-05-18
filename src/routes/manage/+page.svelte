@@ -5,6 +5,8 @@
   
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
+
+  //let userId = 'USER_ID';
   
     // Define the Question type
     type Question = {
@@ -21,8 +23,6 @@
   let correctAnswer = 0;
   let editingQuestion: Question | null = null; 
 
-  // Store the quiz questions
-  let quizQuestions: Question[] = [];
 
   async function createQuizQuestion() {
     const quizQuestionData = {
@@ -49,23 +49,21 @@
     }
   }
 
-  async function deleteQuizQuestion(questionId: string) {
+  async function deleteQuizQuestion(questionId) {
     try {
       const questionRef = doc(db, 'QuizQuestions', questionId);
       await deleteDoc(questionRef);
       console.log('Quiz question deleted with ID:', questionId);
-      quizQuestions = quizQuestions.filter(question => question.id !== questionId);
     } catch (error) {
       console.error('Error deleting quiz question:', error);
     }
   }
 
-  function editQuizQuestion(question: Question) {
+  function editQuizQuestion(question) {
     editingQuestion = { ...question };
-    //question = editingQuestion.question;
-    //options = editingQuestion.options;
-    //correctAnswer = editingQuestion.correctAnswer;
-    resetForm();
+    question = editingQuestion.question;
+    options = editingQuestion.options;
+    correctAnswer = editingQuestion.correctAnswer;
   } 
 
   function resetForm() {
@@ -74,18 +72,6 @@
     correctAnswer = 0;
     editingQuestion = null;
   }
-
-    // Fetch quiz questions from the database
-  async function fetchQuizQuestions() {
-    const quizQuestionsSnapshot = await collection(db, 'QuizQuestions').get();
-    quizQuestions = quizQuestionsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  }
-
-  fetchQuizQuestions();
-
 </script>
 
 <html lang="en">
@@ -99,7 +85,7 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         
         {#if $user !== null}
-            <p>Logged in as: {$user.name}</p>
+            <p>Logged in as: {$user.username}</p>
             <p>With: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
@@ -134,24 +120,6 @@
                 <Button type="submit" color="primary">Create Quiz Question</Button>
               {/if} 
             </form>
-
-            <h3>Quiz Questions List</h3>
-            {#each quizQuestions as quizQuestion}
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">{quizQuestion.question}</h5>
-                  <ul class="card-text">
-                    {#each quizQuestion.options as option, index}
-                      <li>{index + 1}. {option}</li>
-                    {/each}
-                  </ul>
-                  <p>Correct Answer: {quizQuestion.correctAnswer}</p>
-                  <Button on:click="{() => editQuizQuestion(quizQuestion)}" color="primary">Edit</Button>
-                  <Button on:click="{() => deleteQuizQuestion(quizQuestion.id)}" color="danger">Delete</Button>
-                </div>
-              </div>
-            {/each}
-
           </main>
         {:else}
           <p>Please log in to create your own quiz questions.</p>
