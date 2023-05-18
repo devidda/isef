@@ -19,7 +19,7 @@
   
   <h1>My Questions Page</h1>
   <!-- Add your markup and logic to display the user's questions here -->
-  {#if questions.length > 0}
+  <!--{#if questions.length > 0}
     <ul>
       {#each questions as question}
         <li>{question.question}</li>
@@ -27,5 +27,5 @@
     </ul>
   {:else}
     <p>No questions found.</p>
-  {/if}
+  {/if} -->
   
