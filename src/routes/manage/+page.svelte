@@ -6,12 +6,23 @@
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
 
-  let userId = 'USER_ID';
-
+  //let userId = 'USER_ID';
+  
+    // Define the Question type
+    type Question = {
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: number;
+    };
+    
+  const user = userStore(auth);
+   
   let question = '';
   let options = ['', '', '', ''];
   let correctAnswer = 0;
-  let editingQuestion = null;
+  let editingQuestion: Question | null = null; 
+
 
   async function createQuizQuestion() {
     const quizQuestionData = {
@@ -53,7 +64,7 @@
     question = editingQuestion.question;
     options = editingQuestion.options;
     correctAnswer = editingQuestion.correctAnswer;
-  }
+  } 
 
   function resetForm() {
     question = '';
@@ -96,9 +107,9 @@
               {#if editingQuestion}
                 <Button type="submit" color="primary">Update Quiz Question</Button>
                 <Button on:click="{() => resetForm()}" color="secondary">Cancel</Button>
-              {:else}
+              {:else} 
                 <Button type="submit" color="primary">Create Quiz Question</Button>
-              {/if}
+              {/if} 
             </form>
           </main>
         {:else}
