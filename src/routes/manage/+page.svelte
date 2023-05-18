@@ -15,7 +15,7 @@
     options: string[];
     correctAnswer: number;
     };
-    
+
   const user = userStore(auth);
    
   let question = '';
@@ -84,7 +84,7 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         {#if $user !== null}
           <main>
-            <h1>Create and Edit your own Quiz Questions</h1>
+            <h3>Create and Edit your own Quiz Questions</h3>
 
             <form on:submit|preventDefault="{createQuizQuestion}">
               <FormGroup>
@@ -100,7 +100,7 @@
               {/each}
 
               <FormGroup>
-                <Label for="correctAnswer">Correct Answer:</Label>
+                <Label for="correctAnswer">Declare the Correct Answer:</Label>
                 <Input type="number" id="correctAnswer" bind:value="{correctAnswer}" />
               </FormGroup>
 
