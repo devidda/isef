@@ -13,7 +13,7 @@
     goto("/login")
 	}
 
-  function redirectQuizList(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
+  /*function redirectQuizList(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
     goto("/QuizList")
 	} */
 
