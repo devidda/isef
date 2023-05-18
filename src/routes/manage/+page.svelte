@@ -5,7 +5,7 @@
   //import MyQuestions from '.QuizList.svelte';
   import { redirectQuizList } from './redirect.ts';
   // Import Sveltestrap components
-  import { Button, FormGroup, Label, Input } from 'sveltestrap';
+  import { Button, FormGroup, ListGroup, ListGroupItem, Label, Input } from 'sveltestrap';
 
   let showMyQuestions = false;
 
@@ -28,6 +28,9 @@
   let correctAnswer = 0;
   let editingQuestion: Question | null = null; 
 
+  const unsubscribe = onSnapshot(collection(db, 'QuizQuestions'), (querySnapshot) => {
+    quizQuestions = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  });
 
   async function createQuizQuestion() {
     const quizQuestionData = {
@@ -40,13 +43,13 @@
       if (editingQuestion) {
         // Update existing question
         const questionRef = doc(db, 'QuizQuestions', editingQuestion.id);
-        await updateDoc(questionRef, quizQuestionData);
+        updateDoc(questionRef, quizQuestionData);
         console.log('Quiz question updated with ID:', editingQuestion.id);
         editingQuestion = null;
       } else {
         // Create new question
-        const docRef = await addDoc(collection(db, 'QuizQuestions'), quizQuestionData);
-        console.log('Quiz question created with ID:', docRef.id);
+        addDoc(collection(db, 'QuizQuestions'), quizQuestionData);
+        console.log('Quiz question created');
       }
       resetForm();
     } catch (error) {
@@ -54,10 +57,10 @@
     }
   }
 
-  async function deleteQuizQuestion(questionId) {
+  function deleteQuizQuestion(questionId) {
     try {
       const questionRef = doc(db, 'QuizQuestions', questionId);
-      await deleteDoc(questionRef);
+      deleteDoc(questionRef);
       console.log('Quiz question deleted with ID:', questionId);
     } catch (error) {
       console.error('Error deleting quiz question:', error);
@@ -77,6 +80,11 @@
     correctAnswer = 0;
     editingQuestion = null;
   }
+
+  onDestroy(() => {
+    unsubscribe(); // Unsubscribe from the snapshot listener when the component is destroyed
+  });
+
 </script>
 
 <html lang="en">
@@ -90,10 +98,11 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         
         {#if $user !== null}
-            <p>Logged in as: {$user.usid}</p>
-            <p>With: {$user.email}</p>
+            <!--<p>Logged in as: {$user.usid}</p> -->
+            <p>Logged in as: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
+            <button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
         {/if}
 
         {#if $user !== null}
@@ -129,8 +138,23 @@
         {:else}
           <p>Please log in to create your own quiz questions.</p>
         {/if}
-
+        
+        <!--<Button type="change" color="primary"> My Quiz Questions</Button> -->
+      
         <button class="btn btn-light" on:click={redirectQuizList}>My Quiz Questions</button>
+        <button class="btn btn-light" on:click={toggleShowMyQuestions}>My Quiz Questions</button>
+
+        {#if showMyQuestions}
+          <ListGroup>
+            {#each quizQuestions as question}
+              <ListGroupItem>
+                <p>{question.question}</p>
+                <Button on:click="{() => deleteQuizQuestion(question.id)}" color="danger">Delete</Button>
+                <Button on:click="{() => editQuizQuestion(question)}" color="secondary">Edit</Button>
+              </ListGroupItem>
+            {/each}
+          </ListGroup>
+        {/if}
         <!--
           
         <button on:click={toggleShowMyQuestions}>My Questions</button>
