@@ -85,7 +85,8 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         
         {#if $user !== null}
-            <p>Logged in as: {$user.email}</p>
+            <p>Logged in as: {$user.username}</p>
+            <p>With: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
         {/if}
