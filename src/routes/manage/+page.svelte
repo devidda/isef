@@ -80,13 +80,16 @@
       <div class="card text-black ">
         <div class="card-header">
           <h1>Quiz Questions</h1>
-          {#if $user !== null}
-            <p>Logged in as: {$user.email}</p>
-          {:else}
-            <p>Not logged in</p>
-          {/if}
+          
         </div>
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
+        
+        {#if $user !== null}
+            <p>Logged in as: {$user.email}</p>
+        {:else}
+            <p>Not logged in</p>
+        {/if}
+
         {#if $user !== null}
           <main>
             <h3>Create and Edit your own Quiz Questions</h3>
