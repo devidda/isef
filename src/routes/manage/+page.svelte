@@ -2,11 +2,15 @@
   import { auth, db } from "$lib/firebase/firebase";
   import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-  
+  import MyQuestions from '$lib/MyQuestions.svelte';
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
 
-  //let userId = 'USER_ID';
+  let showMyQuestions = false;
+
+  function toggleShowMyQuestions() {
+    showMyQuestions = !showMyQuestions;
+  }
   
     // Define the Question type
     type Question = {
@@ -85,7 +89,7 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         
         {#if $user !== null}
-            <p>Logged in as: {$user.username}</p>
+            <p>Logged in as: {$user.usid}</p>
             <p>With: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
@@ -123,6 +127,17 @@
           </main>
         {:else}
           <p>Please log in to create your own quiz questions.</p>
+        {/if}
+
+        <!-- Toggle the display of the "My Questions" page -->
+        <button on:click={toggleShowMyQuestions}>My Questions</button>
+
+        <!-- Conditional rendering of "My Questions" page or default content -->
+        {#if showMyQuestions}
+          <MyQuestions />
+        {:else}
+          <!-- Add the default page content here -->
+          <p>This is the default page content.</p>
         {/if}
       </div>
     </div>
