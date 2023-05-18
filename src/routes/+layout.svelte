@@ -22,7 +22,7 @@
         <a class="nav-link" href="/login">Login</a>
       </li> 
       <li class="nav-item">
-        <a class="nav-link" href="/manage">Quiz Questions</a>
+        <a class="nav-link" href="/create-question">Quiz Questions</a>
       </li>
       {#if $user}
       <li class="nav-item">
@@ -33,8 +33,8 @@
   </div>
 </nav>
 
-<!--<Route path="/user-question/:userID" let:params>
-  <UserQuestions {userID} />
-</Route> -->
+<Route path="/user-question">
+  <CreateQuizQuestion />
+</Route> 
 
 <slot></slot>
