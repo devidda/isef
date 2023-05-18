@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { auth, db } from "$lib/firebase/firebase";
   import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
@@ -6,6 +7,10 @@
   import { redirectQuizList } from './redirect.ts';
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
+
+  function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
+    goto("/login")
+	}
 
   let showMyQuestions = false;
 
@@ -94,6 +99,7 @@
             <p>With: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
+            <button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
         {/if}
 
         {#if $user !== null}
