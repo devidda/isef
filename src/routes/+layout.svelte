@@ -22,7 +22,7 @@
         <a class="nav-link" href="/login">Login</a>
       </li> 
       <li class="nav-item">
-        <a class="nav-link" href="/manage">Create Your Own Question</a>
+        <a class="nav-link" href="/manage">Quiz Questions</a>
       </li>
       {#if $user}
       <li class="nav-item">
