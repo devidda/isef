@@ -2,7 +2,8 @@
   import { auth, db } from "$lib/firebase/firebase";
   import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-  //import MyQuestions from '.MyQuestions.svelte';
+  //import MyQuestions from '.QuizList.svelte';
+
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
 
@@ -129,16 +130,19 @@
           <p>Please log in to create your own quiz questions.</p>
         {/if}
 
-        <!-- Toggle the display of the "My Questions" page -->
+        <Button href="/QuizList" color="primary">My Quiz Questions</Button>
+        
+        <!--
+          
         <button on:click={toggleShowMyQuestions}>My Questions</button>
 
-        <!-- Conditional rendering of "My Questions" page or default content -->
+        
         {#if showMyQuestions}
           <MyQuestions />
         {:else}
-          <!-- Add the default page content here -->
+          
           <p>This is the default page content.</p>
-        {/if}
+        {/if}-->
       </div>
     </div>
   </body>
