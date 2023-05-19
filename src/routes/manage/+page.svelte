@@ -40,22 +40,26 @@
 
 
   async function createQuizQuestion() {
-    const quizQuestionData = {
-      question,
-      options,
-      correctAnswer,
-    };
-
     try {
       if (editingQuestion) {
         // Update existing question
         const questionRef = doc(db, 'QuizQuestions', editingQuestion.id);
-        await updateDoc(questionRef, quizQuestionData);
+        await updateDoc(questionRef, {
+          'question': question,
+          'options': options,
+          'correctAnwser': correctAnswer
+        });
         console.log('Quiz question updated with ID:', editingQuestion.id);
         editingQuestion = null;
       } else {
         // Create new question
-        const docRef = await addDoc(collection(db, 'QuizQuestions'), quizQuestionData);
+        console.log('Question:', question);
+        console.log('Options:', options);
+        const docRef = await addDoc(collection(db, 'QuizQuestions'), {
+          'question': question,
+          'options': options,
+          'correctAnwser': correctAnswer
+        });
         console.log('Quiz question created with ID:', docRef.id);
       }
       resetForm();
@@ -64,7 +68,7 @@
     }
   }
 
-  async function deleteQuizQuestion(questionId) {
+  async function deleteQuizQuestion(questionId: string) {
     try {
       const questionRef = doc(db, 'QuizQuestions', questionId);
       await deleteDoc(questionRef);
@@ -74,7 +78,7 @@
     }
   }
 
-  function editQuizQuestion(question) {
+  function editQuizQuestion(question: string) {
     editingQuestion = { ...question };
     question = editingQuestion.question;
     options = editingQuestion.options;
@@ -100,7 +104,7 @@
         <p class="card-text">Create, Edit, and Delete your own Quiz Questions.</p>
         
         {#if $user !== null}
-            <p>Logged in as: {$user.usid}</p>
+            <p>Logged in as: {$user.uid}</p>
             <p>With: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
@@ -141,7 +145,7 @@
           <p>Please log in to create your own quiz questions.</p>
         {/if}
 
-        <button class="btn btn-light" on:click={redirectQuizList}>My Quiz Questions</button>
+        <!-- <button class="btn btn-light" on:click={redirectQuizList}>My Quiz Questions</button> -->
         <!--
           
         <button on:click={toggleShowMyQuestions}>My Questions</button>
