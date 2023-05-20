@@ -2,12 +2,13 @@
   import { goto } from "$app/navigation";
   import { auth, db } from "$lib/firebase/firebase";
   import { userStore } from 'sveltefire';
-  import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+  import { collection, addDoc, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
   //import MyQuestions from '.QuizList.svelte';
   //import { redirectQuizList } from './redirect.ts';
   // Import Sveltestrap components
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
   import "$lib/main.css";
+  import type { quiz } from "$lib/utils/db.d.ts";
 
   function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
     goto("/login")
@@ -23,42 +24,38 @@
     showMyQuestions = !showMyQuestions;
   }
   
-    // Define the Question type
-    type Question = {
-    id: string;
-    question: string;
-    options: string[];
-    correctAnswer: number;
-    };
-
   const user = userStore(auth);
-   
-  let question = '';
-  let options = ['', '', '', ''];
-  let correctAnswer = 0;
-  let editingQuestion: Question | null = null; 
-
-
+  // Use the defined question type
+  let quizQuestion : quiz = { correctAnswer:'', difficulty:'', lastModified:Timestamp.now(), listOfFalseAnswers:['','',''], question:'', tags:[''], id:''};
+  let editingQuestion: quiz | null = null;
+  
   async function createQuizQuestion() {
+    quizQuestion.lastModified = Timestamp.now();
     try {
       if (editingQuestion) {
         // Update existing question
-        const questionRef = doc(db, 'QuizQuestions', editingQuestion.id);
+        const questionRef = doc(db, 'quiz', editingQuestion.id);
         await updateDoc(questionRef, {
-          'question': question,
-          'options': options,
-          'correctAnwser': correctAnswer
+          'correctAnwser': quizQuestion.correctAnswer,
+          'difficulty': quizQuestion.difficulty,
+          'lastModified': quizQuestion.lastModified,
+          'listOfFalseAnswers': quizQuestion.listOfFalseAnswers,
+          'question': quizQuestion.question,
+          'tags': quizQuestion.tags
         });
         console.log('Quiz question updated with ID:', editingQuestion.id);
         editingQuestion = null;
       } else {
         // Create new question
-        console.log('Question:', question);
-        console.log('Options:', options);
-        const docRef = await addDoc(collection(db, 'QuizQuestions'), {
-          'question': question,
-          'options': options,
-          'correctAnwser': correctAnswer
+        console.log('Question:', quizQuestion.question);
+        console.log('listOfFalseAnswers:', quizQuestion.listOfFalseAnswers);
+        const docRef = await addDoc(collection(db, 'quiz'), {
+          'correctAnwser': quizQuestion.correctAnswer,
+          'difficulty': quizQuestion.difficulty,
+          'lastModified': quizQuestion.lastModified,
+          'listOfFalseAnswers': quizQuestion.listOfFalseAnswers,
+          'question': quizQuestion.question,
+          'tags': quizQuestion.tags
         });
         console.log('Quiz question created with ID:', docRef.id);
       }
@@ -70,7 +67,7 @@
 
   async function deleteQuizQuestion(questionId: string) {
     try {
-      const questionRef = doc(db, 'QuizQuestions', questionId);
+      const questionRef = doc(db, 'quiz', questionId);
       await deleteDoc(questionRef);
       console.log('Quiz question deleted with ID:', questionId);
     } catch (error) {
@@ -80,15 +77,15 @@
 
   function editQuizQuestion(question: string) {
     editingQuestion = { ...question };
-    question = editingQuestion.question;
-    options = editingQuestion.options;
-    correctAnswer = editingQuestion.correctAnswer;
+    quizQuestion.question = editingQuestion.question;
+    quizQuestion.listOfFalseAnswers = editingQuestion.options;
+    quizQuestion.correctAnswer = editingQuestion.correctAnswer;
   } 
 
   function resetForm() {
-    question = '';
-    options = ['', '', '', ''];
-    correctAnswer = 0;
+    quizQuestion.question = '';
+    quizQuestion.listOfFalseAnswers = ['', '', ''];
+    quizQuestion.correctAnswer = '';
     editingQuestion = null;
   }
 </script>
@@ -118,20 +115,21 @@
             <form on:submit|preventDefault="{createQuizQuestion}">
               <FormGroup>
                 <Label for="question">Question:</Label>
-                <Input type="text" id="question" bind:value="{question}" />
+                <Input type="text" id="question" bind:value="{quizQuestion.question}" />
               </FormGroup>
 
-              {#each options as option, index}
+              <FormGroup>
+                <Label for="correctAnswer">Correct Answer:</Label>
+                <Input type="text" id="correctAnswer" bind:value="{quizQuestion.correctAnswer}" />
+              </FormGroup>
+
+              {#each quizQuestion.listOfFalseAnswers as option, index}
                 <FormGroup>
-                  <Label for="{`option${index}`}">Option {index + 1}:</Label>
-                  <Input type="text" id="{`option${index}`}" bind:value="{options[index]}" />
+                  <Label for="{`option${index}`}">False Answer {index + 1}:</Label>
+                  <Input type="text" id="{`option${index}`}" bind:value="{quizQuestion.listOfFalseAnswers[index]}" />
                 </FormGroup>
               {/each}
 
-              <FormGroup>
-                <Label for="correctAnswer">Declare the Correct Answer:</Label>
-                <Input type="number" id="correctAnswer" bind:value="{correctAnswer}" />
-              </FormGroup>
 
               {#if editingQuestion}
                 <Button type="submit" color="primary">Update Quiz Question</Button>
