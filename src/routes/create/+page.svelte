@@ -1,30 +1,26 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { auth, db } from "$lib/firebase/firebase";
-  import { userStore, collectionStore } from 'sveltefire';
+  import { userStore } from 'sveltefire';
   import { collection, addDoc, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
-  import { onMount } from 'svelte';
   import { Button, FormGroup, Label, Input } from 'sveltestrap';
   import "$lib/main.css";
   import type { quiz } from "$lib/utils/db.d.ts";
-	import { select_options } from "svelte/internal";
 
   function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
     goto("/login")
 	}
 
   let showMyQuestions = false;
-  let selectedOption = Array<any>;
 
   function toggleShowMyQuestions() {
     showMyQuestions = !showMyQuestions;
   }
-  const existingQuizQuestions = collectionStore<quiz >(db, 'quiz');
+  
   const user = userStore(auth);
   let quizQuestion : quiz = { correctAnswer:'', difficulty:'', lastModified:Timestamp.now(), listOfFalseAnswers:['','',''], question:'', tags:[''], id:'', creatorID:'' };
   let editingQuestion: quiz | null = null;
-
-
+  
   async function createQuizQuestion() {
         
     quizQuestion.lastModified = Timestamp.now();
@@ -87,12 +83,12 @@
     <div class="container-background">
       <div class="card text-black ">
         <div class="card-header">
-          <h1>Edit and delete your own Quiz Questions</h1>
+          <h1>Quiz Questions</h1>
           
-        </div>
+        </div>       
         {#if $user !== null}
-            <!--<p>Logged in as: {$user.uid}</p>
-            <p>With: {$user.email}</p>-->
+            <p>Logged in as: {$user.uid}</p>
+            <p>With: {$user.email}</p>
         {:else}
             <p>Not logged in</p>
             <button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
@@ -100,37 +96,7 @@
 
         {#if $user !== null}
           <main>
-            <h3>Please select the question that you want to edit or delete</h3>
-            <br>
-            {#each $existingQuizQuestions as quiz, index}
-            {#if quiz.creatorID === $user.uid}
-
-            <p> <Button color="danger">Delete</Button>   <Button color="primary">Edit</Button>  {quiz.question}, ID der Frage: {quiz.id} </p>
-            <form on:submit|preventDefault="{createQuizQuestion}">
-              <FormGroup>
-                <Label for="question">Question:</Label>
-                <Input type="text" id="question" bind:value="{quizQuestion.question}" />
-              </FormGroup>
-              </form>
-
-                        <!--{myOptions.push(quiz.question)} -->
-               <!-- <input type=checkbox value={quiz.id} checked={false} on:change={() => handleCheckboxClick(index,quiz.id)}> -->
-            <!--<p><input type=checkbox  value={quiz.id} checked={false} on:change={handleCheckboxClick}> {quiz.question}, ID der Frage: {quiz.id}</p> -->
-            <!-- bind:group={selectedOption} id="option{index}" disabled={selectedOption.length === 1 && !selectedOption.includes(quiz)} -->
-            {/if}
-            {/each}
-
-<!--
-             <select bind:value={selected}>
-              {#each myOptions as option}
-               <option value={option}>{option}</option>
-               {/each}
-             </select>
--->
-
-            <p>ende persönliches testreich...</p>
-            <br><br><br><br><br><br><br><br><br><br><br><br>
-
+            <h3>Create your own Quiz Questions</h3>
 
             <form on:submit|preventDefault="{createQuizQuestion}">
               <FormGroup>
@@ -149,32 +115,12 @@
                   <Input type="text" id="{`option${index}`}" bind:value="{quizQuestion.listOfFalseAnswers[index]}" />
                 </FormGroup>
               {/each}
-
-
-              {#if editingQuestion}
-                <Button type="submit" color="primary">Update Quiz Question</Button>
-                <Button on:click="{() => resetForm()}" color="secondary">Cancel</Button>
-              {:else} 
                 <Button type="submit" color="primary">Create Quiz Question</Button>
-              {/if} 
             </form>
           </main>
         {:else}
           <p>Please log in to create your own quiz questions.</p>
         {/if}
-
-        <!-- <button class="btn btn-light" on:click={redirectQuizList}>My Quiz Questions</button> -->
-        <!--
-          
-        <button on:click={toggleShowMyQuestions}>My Questions</button>
-
-        
-        {#if showMyQuestions}
-          <MyQuestions />
-        {:else}
-          
-          <p>This is the default page content.</p>
-        {/if}-->
       </div>
     </div>
   </body>

@@ -22,6 +22,7 @@ interface quiz {
 	question: string;
 	tags: Array;
 	id: string;
+	creatorID: string;
 }
 
 interface lobby {
