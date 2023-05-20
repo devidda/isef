@@ -17,10 +17,11 @@
       <li class="nav-item">
         <a class="nav-link" href="/about">About</a>
       </li>
+      {#if !$user}
       <li class="nav-item"> 
         <a class="nav-link" href="/login">Login</a>
       </li> 
-      {#if $user}
+      {:else}
       <li class="nav-item">
         <button class="btn btn-outline-secondary" on:click={signOut}>Sign Out</button>
       </li>
