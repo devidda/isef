@@ -6,10 +6,10 @@
 
 <script lang="ts">	
 	import { goto } from "$app/navigation";
-	import { auth, db } from "$lib/firebase/firebase";
-	import Lobby from "./Lobby.svelte"
+	import { auth } from "$lib/firebase/firebase";
+	import Lobby from "$lib/lobby/Lobby.svelte"
 
-	import { userStore, Collection, FirebaseApp, collectionStore } from 'sveltefire';
+	import { userStore } from 'sveltefire';
 	
 	const user = userStore(auth);
 
