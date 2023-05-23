@@ -4,7 +4,9 @@
   import { FirebaseApp, User } from 'sveltefire';
 	import PreLobby from './PreLobby.svelte';
 	import LobbyDashboard from './LobbyDashboard.svelte';
+	import Game from '$lib/game/Game.svelte';
 
+  let gameInProgress = false;
   let selectedStacks: string[] = [];
 
   // the lobbyID variable affects if a lobby-menu or a list of available lobbies is displayed
@@ -57,6 +59,8 @@
         throw new Error('Error starting game.')
       }
 
+      gameInProgress  = true;
+
     } catch (error) {
       const typedError = error as Error
       alert("Error setting up lobby: " +  typedError.message);
@@ -69,12 +73,16 @@
     {#if currentlyLeavingLobby}
       Leaving lobby...
     {:else}
-      {#if !lobbyID}
-        <PreLobby loggedInUser={loggedInUser} bind:lobbyID={lobbyID} currentlyLeavingLobby={currentlyLeavingLobby} />
+      {#if lobbyID}
+        {#if gameInProgress}
+          <Game lobbyID=lobbyID user=loggedInUser/>
+        {:else}
+          <LobbyDashboard bind:lobbyID={lobbyID} loggedInUser={loggedInUser} bind:selectedStacks={selectedStacks} />
+          <Button class="start-game-button" color="primary" on:click={() => startGame()}>Start Game</Button>
+          <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
+        {/if}
       {:else}
-        <LobbyDashboard bind:lobbyID={lobbyID} loggedInUser={loggedInUser} bind:selectedStacks={selectedStacks} />
-        <Button class="start-game-button" color="primary" on:click={() => startGame()}>Start Game</Button>
-        <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
+        <PreLobby loggedInUser={loggedInUser} bind:lobbyID={lobbyID} currentlyLeavingLobby={currentlyLeavingLobby} />
       {/if}
     {/if}
   </User>

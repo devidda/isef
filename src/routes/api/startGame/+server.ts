@@ -11,7 +11,7 @@ export const config: Config = {
 export const POST = (async ({ request }) => {
   try {
     // get data from request
-    const { lobbyID } = await request.json();
+    const lobbyID = await request.json();
     if (!lobbyID) {
       throw new Error('One of the parameters has been failed to delivered!')
     }
