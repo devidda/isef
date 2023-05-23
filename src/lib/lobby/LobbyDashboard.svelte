@@ -67,7 +67,7 @@
             {#each data as stack}
               <ListGroupItem>
                 <Label>
-                  <input type="checkbox" value={stack.name} bind:group={selectedStacks} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}/>
+                  <input type="checkbox" value={stack.id} bind:group={selectedStacks} disabled={activeLobby.listOfUsers[0] === loggedInUser.uid ? false: true}/>
                   {stack.name}
                 </Label>
               </ListGroupItem>

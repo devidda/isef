@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from 'sveltestrap';
   import { auth, db } from '$lib/firebase/firebase'
-  import { FirebaseApp, User } from 'sveltefire';
+  import { Doc, FirebaseApp, User } from 'sveltefire';
 	import PreLobby from './PreLobby.svelte';
 	import LobbyDashboard from './LobbyDashboard.svelte';
 	import Game from '$lib/game/Game.svelte';
@@ -75,10 +75,12 @@
     {:else}
       {#if lobbyID}
         {#if gameInProgress}
-          <Game lobbyID=lobbyID user=loggedInUser/>
+          <Game bind:lobbyID={lobbyID} user={loggedInUser} bind:gameInProgress={gameInProgress} />
         {:else}
           <LobbyDashboard bind:lobbyID={lobbyID} loggedInUser={loggedInUser} bind:selectedStacks={selectedStacks} />
-          <Button class="start-game-button" color="primary" on:click={() => startGame()}>Start Game</Button>
+            <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
+              <Button class="start-game-button" color="primary" on:click={() => startGame()} disabled={(lobbyData.listOfUsers[0] === loggedInUser.uid) ? false : true}>Start Game</Button>
+            </Doc>
           <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
         {/if}
       {:else}
