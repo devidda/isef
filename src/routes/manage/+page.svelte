@@ -36,9 +36,9 @@
 
 	async function initializeEditField() {
 		editField = [];
-		let size = await getCountFromServer(existingQuizQuestionsForSize);
-		let sizer = size.data().count;
-		for (let i = 0; i < sizer; i++) {
+		let countData = await getCountFromServer(existingQuizQuestionsForSize);
+		let size = countData.data().count;
+		for (let i = 0; i < size; i++) {
 			editField.push(false);
 		}
 	}
@@ -53,7 +53,7 @@
 				// Update existing question
 				const questionRef = doc(db, 'quiz', editingQuestion.id);
 				await updateDoc(questionRef, {
-					correctAnwser: quizQuestion.correctAnswer,
+					correctAnswer: quizQuestion.correctAnswer,
 					difficulty: quizQuestion.difficulty,
 					lastModified: quizQuestion.lastModified,
 					listOfFalseAnswers: quizQuestion.listOfFalseAnswers,
@@ -68,7 +68,7 @@
 					console.log('Question:', quizQuestion.question);
 					console.log('listOfFalseAnswers:', quizQuestion.listOfFalseAnswers);
 					const docRef = await addDoc(collection(db, 'quiz'), {
-						correctAnwser: quizQuestion.correctAnswer,
+						correctAnswer: quizQuestion.correctAnswer,
 						difficulty: quizQuestion.difficulty,
 						lastModified: quizQuestion.lastModified,
 						listOfFalseAnswers: quizQuestion.listOfFalseAnswers,
@@ -122,51 +122,41 @@
 					<main>
 						<h3>Please select the question that you want to edit or delete</h3>
 						<br />
-						{#each $existingQuizQuestions as quiz, index}
-							{#if quiz.creatorID === $user.uid}
+						{#each $existingQuizQuestions as quizQuestion, index}
+							{#if quizQuestion.creatorID === $user.uid}
 								<p>
-									<Button color="danger">Delete</Button>
+									<Button color="danger" on:click={() => deleteQuizQuestion(quizQuestion.id)} >Delete</Button>
 									<Button color="primary" on:click={() => (editField[index] = !editField[index])}>Edit</Button>
-									{quiz.question}, ID der Frage: {quiz.id}
+									{quizQuestion.question}
 								</p>
 								{#if editField[index]}
-									<p>Feld wird editiert</p>
+
+                <form on:submit|preventDefault={createQuizQuestion}>
+                  <FormGroup>
+                    <Label for="question">Questionl:</Label>
+                    <Input type="text" id="question" bind:value={quizQuestion.question} />
+                  </FormGroup>
+    
+                  <FormGroup>
+                    <Label for="correctAnswer">Correct Answer:</Label>
+                    <Input type="text" id="correctAnswer" bind:value={quizQuestion.correctAnswer} />
+                  </FormGroup>
+    
+                  {#each quizQuestion.listOfFalseAnswers as option, index}
+                    <FormGroup>
+                      <Label for={`option${index}`}>False Answer {index + 1}:</Label>
+                      <Input
+                        type="text"
+                        id={`option${index}`}
+                        bind:value={quizQuestion.listOfFalseAnswers[index]}
+                      />
+                    </FormGroup>
+                  {/each}
+                    <Button type="submit" color="primary">Update Quiz Question</Button>
+                </form>
 								{/if}
 							{/if}
 						{/each}
-
-						<p>ende persönliches testreich...</p>
-						<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
-
-						<form on:submit|preventDefault={createQuizQuestion}>
-							<FormGroup>
-								<Label for="question">Question:</Label>
-								<Input type="text" id="question" bind:value={quizQuestion.question} />
-							</FormGroup>
-
-							<FormGroup>
-								<Label for="correctAnswer">Correct Answer:</Label>
-								<Input type="text" id="correctAnswer" bind:value={quizQuestion.correctAnswer} />
-							</FormGroup>
-
-							{#each quizQuestion.listOfFalseAnswers as option, index}
-								<FormGroup>
-									<Label for={`option${index}`}>False Answer {index + 1}:</Label>
-									<Input
-										type="text"
-										id={`option${index}`}
-										bind:value={quizQuestion.listOfFalseAnswers[index]}
-									/>
-								</FormGroup>
-							{/each}
-
-							{#if editingQuestion}
-								<Button type="submit" color="primary">Update Quiz Question</Button>
-								<Button on:click={() => resetForm()} color="secondary">Cancel</Button>
-							{:else}
-								<Button type="submit" color="primary">Create Quiz Question</Button>
-							{/if}
-						</form>
 					</main>
 				{:else}
 					<p>Please log in to create your own quiz questions.</p>
