@@ -43,8 +43,14 @@
 	}
 
 
-	async function startGame(): Promise<void> {
+	async function startGame(qStacks: string[]): Promise<void> {
     try {
+      if (!qStacks) {
+        alert('No Question-Stacks found in Lobby Settings. \n' +
+          'Make sure to click "Save Settings" after selecting the stacks!');
+        return;
+      }
+
       // call server function to add user to Firestore
       const response = await fetch('/api/startGame', {
           method: 'POST',
@@ -79,7 +85,7 @@
         {:else}
           <LobbyDashboard bind:lobbyID={lobbyID} loggedInUser={loggedInUser} bind:selectedStacks={selectedStacks} />
             <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
-              <Button class="start-game-button" color="primary" on:click={() => startGame()} disabled={(lobbyData.listOfUsers[0] === loggedInUser.uid) ? false : true}>Start Game</Button>
+              <Button class="start-game-button" color="primary" on:click={() => startGame(lobbyData.questionStacks)} disabled={(lobbyData.listOfUsers[0] === loggedInUser.uid) ? false : true}>Start Game</Button>
             </Doc>
           <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
         {/if}
