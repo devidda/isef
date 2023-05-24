@@ -688,6 +688,11 @@
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.21.tgz"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
+"@popperjs/core@^2.9.2":
+  version "2.11.7"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.7.tgz#ccab5c8f7dc557a52ca3288c10075c9ccd37fff7"
+  integrity sha512-Cr4OjIkipTtcXKjAsm8agyleBuDHvxzeBoa1v543lbv1YaIwQjESsVcmjiWiPEbC1FIeHOG/Op9kdCmAmiS3Kw==
+
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@protobufjs/aspromise/-/aspromise-1.1.2.tgz"
@@ -1910,6 +1915,13 @@ sveltefire@^0.2.3:
   version "0.2.3"
   resolved "https://registry.npmjs.org/sveltefire/-/sveltefire-0.2.3.tgz"
   integrity sha512-NbAHAoh2jpGuAd9JwmreRPDD4YmGMJUflsbh50sJwp6CSbfezcR7Kh0c8H7X1v62f8FUroAlmqzjeP1Gah+m/A==
+
+sveltestrap@^5.10.0:
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/sveltestrap/-/sveltestrap-5.10.0.tgz#4bea3caf06849f20cfcd97c4687256111dc76e9e"
+  integrity sha512-k6Ob+6G2AMYvBidXHBKM9W28fJqFHbmosqCe/NC8pv6TV7K+v47Yw+zmnLWkjqCzzmjkSLkL48SrHZrlWc9mYQ==
+  dependencies:
+    "@popperjs/core" "^2.9.2"
 
 tar@^6.1.11:
   version "6.1.13"

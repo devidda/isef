@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import type { Config } from '@sveltejs/adapter-vercel';
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/firebase/firebase'
-import { setDoc, doc } from '@firebase/firestore';
+import { doc, updateDoc } from '@firebase/firestore';
 
 export const config: Config = {
   runtime: 'edge',
@@ -11,22 +11,26 @@ export const config: Config = {
 export const POST = (async ({ request }) => {
   try {
     // get data from request
-    const { uid, displayName }: {uid: string, displayName: string} = await request.json();
-    if (!uid || !displayName) {
+    const lobbyID = await request.json();
+    if (!lobbyID) {
       throw new Error('One of the parameters has been failed to delivered!')
     }
 
-    // add new user to firestore
-    await setDoc(doc(db, 'user', uid), {
-      username: displayName,
-      score: 0
-    });
+    const lobbyRef = doc(db, 'lobby', lobbyID);
+
+    if (lobbyRef) {
+      await updateDoc(lobbyRef, {
+        status: 'GAMING'
+      });
+    } else {
+      throw new Error('An error occured when using the reference to the lobby.');
+    }
 
     return json(true);
 
   } catch (error) {
     const typedError = error as Error;
-    console.error('Error writing new user to Firestore:', typedError.message);
+    console.error('Error saving settings:', typedError.message);
     return json(false);
   }
 }) satisfies RequestHandler;
