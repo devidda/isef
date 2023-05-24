@@ -21,6 +21,8 @@ interface quiz {
 	listOfFalseAnswers: Array;
 	question: string;
 	tags: Array;
+	id: string;
+	creatorID: string;
 }
 
 interface lobby {
