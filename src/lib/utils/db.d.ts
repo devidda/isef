@@ -7,11 +7,10 @@ interface user {
 
 interface stack {
 	author: string;
-	difficulty: string;
 	lastModified: Timestamp;
 	name: string;
 	quizzes: Array;
-	tags: Array;
+	id: string;
 }
 
 interface quiz {

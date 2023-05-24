@@ -121,6 +121,7 @@
 	}
 
 	async function deleteQuizQuestion(questionId: string) {
+		if (confirm("You are sure you want to delete this question?")){
 		try {
 			const questionRef = doc(db, 'quiz', questionId);
 			await deleteDoc(questionRef);
@@ -136,6 +137,7 @@
 			}
 		}
 	}
+}
 
 	function resetForm() {
 		quizQuestion.question = '';
