@@ -16,7 +16,6 @@
 	import { Button, FormGroup, Label, Input } from 'sveltestrap';
 	import type { quiz, stack } from '$lib/utils/db.d.ts';
 	import '$lib/main.css';
-	import { element } from 'svelte/internal';
 
 	function redirectLogin(
 		event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }
@@ -75,11 +74,13 @@
 
 	const stacks = collectionStore<stack>(db, 'stack');
 	let selected: any;
+	let selectedOld: any;
 	selected = '';
 	let stackName: string = '';
 	const existingQuizQuestions = collectionStore<quiz>(db, 'quiz');
 	const existingQuizQuestionsForSize = collection(db, 'quiz');
 	const user = userStore(auth);
+	let stackSnapshotId: string = '';
 	let value = '';
 	let editField: any;
 	let quizQuestion: quiz = {
@@ -104,36 +105,45 @@
 
 	initializeEditField();
 
-	function toggleEditField(index: number) {
-		if (editField[index] === true) {
-			editField[index] = false;
-		} else {
+	function toggleEditField(index: number, closeEverything: boolean) {
+		if (closeEverything) {
 			for (let i = 0; i < editField.length; i++) {
 				if (editField[i] === true) {
 					editField[i] = false;
 				}
 			}
-			editField[index] = true;
+		} else {
+			if (editField[index] === true) {
+				editField[index] = false;
+			} else {
+				for (let i = 0; i < editField.length; i++) {
+					if (editField[i] === true) {
+						editField[i] = false;
+					}
+				}
+				editField[index] = true;
+			}
 		}
 		toggleStackView(false);
 	}
 	let stackView: boolean = false;
-	function toggleStackView(switchle:Boolean)
-{
-	if (switchle){
-		stackView = true;
+	function toggleStackView(switchle: Boolean) {
+		if (switchle) {
+			selectedOld = selected;
+			stackView = true;
+		} else {
+			stackView = false;
+		}
 	}
-	else{
-		stackView = false;
+
+	function resetSelectedOld() {
+		selectedOld = '';
 	}
-	
-}
 
 	async function getCurrentStackName() {
 		let valid: number = 0;
 
 		let stackSnapshot: any;
-		console.log('ich frage nach id: ', updatedQuestionID);
 		const testQuery = query(
 			collection(db, 'stack'),
 			where('quizzes', 'array-contains', updatedQuestionID)
@@ -145,31 +155,122 @@
 			let result = (doc.id, ' => ', doc.data());
 			stackName = result.name;
 			stackSnapshot = result;
+			stackSnapshotId = doc.id;
 		});
 		if (valid < 1) {
 			stackName = 'No valid stack!';
 		} else if (valid > 1) {
-			alert('This should not happen - ' + valid + ' stacks were found. Please contact an administrator');
+			alert(
+				'This should not happen - ' + valid + ' stacks were found. Please contact an administrator'
+			);
 			stackName = 'No valid stack!';
-		} 
+		} else {
+			selected = stackSnapshot;
+		}
 	}
 
 	async function updateQuizQuestion() {
-		quizQuestion.lastModified = Timestamp.now();
+		if (
+			!updatedCorrectAnswer ||
+			!updatedFalseAnswer0 ||
+			!updatedFalseAnswer1 ||
+			!updatedFalseAnswer2 ||
+			!updatedQuestion ||
+			!updatedQuestionID ||
+			!selected
+		) {
+			alert('Please fill in all required fields');
+		} else {
+			quizQuestion.lastModified = Timestamp.now();
+			try {
+				const questionRef = doc(db, 'quiz', updatedQuestionID);
+				await updateDoc(questionRef, {
+					correctAnswer: updatedCorrectAnswer,
+					lastModified: quizQuestion.lastModified,
+					listOfFalseAnswers: [updatedFalseAnswer0, updatedFalseAnswer1, updatedFalseAnswer2],
+					question: updatedQuestion
+				});
+
+				console.log('Quiz question updated with ID:', updatedQuestionID);
+				resetForm();
+			} catch (error) {
+				console.error('Error creating/updating quiz question:', error);
+			}
+			if (selectedOld) {
+				//button Change Stack was clicked - maybe we have some changes
+				updateStacks(updatedQuestionID);
+			}
+			toggleEditField(0, true);
+		}
+	}
+
+	async function updateStacks(updatedQuestionID: string) {
+		if (selectedOld.name === selected.name) {
+			console.log('The user selected the same stack as before... do nothing');
+			return;
+		} else if (!selected.name) {
+			console.log('No stack is selected... do nothing');
+			return;
+		}
+		console.log('We have a stackchange. From: ' + selectedOld.name + ' to: ' + selected.name);
+		let lastModified = Timestamp.now();
+
+		//we delete the questionID from the old stack
+		//first, we read the current stack...
+		let oldStackInstance: any;
+		let oldStackID: string;
+		let valid = 0;
+		const testQuery = query(collection(db, 'stack'), where('name', '==', selectedOld.name));
+		const querySnapshot = await getDocs(testQuery);
+
+		querySnapshot.forEach((doc) => {
+			valid++;
+			let result = (doc.id, ' => ', doc.data());
+			oldStackInstance = result;
+			oldStackID = doc.id;
+		});
+		if (valid !== 1) {
+			alert(
+				'Something went wrong... no stack containing ' + selectedOld.name + ' was found. Aborting!'
+			);
+			return;
+		}
+
+		//then we search for the QuizzId and delete it...
+
+		for (let i = 0; i < oldStackInstance.quizzes.length; i++) {
+			if (oldStackInstance.quizzes[i] === updatedQuestionID) {
+				oldStackInstance.quizzes.splice(i, 1);
+			}
+		}
+
+		//then we update the stack
 		try {
-			const questionRef = doc(db, 'quiz', updatedQuestionID);
+			const questionRef = doc(db, 'stack', oldStackID!);
 			await updateDoc(questionRef, {
-				correctAnswer: updatedCorrectAnswer,
-				lastModified: quizQuestion.lastModified,
-				listOfFalseAnswers: [updatedFalseAnswer0, updatedFalseAnswer1, updatedFalseAnswer2],
-				question: updatedQuestion
+				quizzes: oldStackInstance.quizzes,
+				lastModified: quizQuestion.lastModified
 			});
 
-			console.log('Quiz question updated with ID:', updatedQuestionID);
-			resetForm();
+			console.log('stack updated with ID:', oldStackID!);
 		} catch (error) {
-			console.error('Error creating/updating quiz question:', error);
+			console.error('Error updating stack:', error);
 		}
+
+		//we add the questionID to the new stack
+		selected.quizzes.push(updatedQuestionID);
+		try {
+			const questionRef = doc(db, 'stack', selected.id);
+			await updateDoc(questionRef, {
+				quizzes: selected.quizzes,
+				lastModified: quizQuestion.lastModified
+			});
+
+			console.log('stack updated with ID:', selected.id);
+		} catch (error) {
+			console.error('Error updating stack:', error);
+		}
+		resetSelectedOld();
 	}
 
 	async function deleteQuizQuestion(questionId: string) {
@@ -188,6 +289,31 @@
 					}
 				}
 			}
+
+			//does the question have a valid stack? If so, delete the questionID. If not, do nothing
+			if (selected) {
+				for (let i = 0; i < selected.quizzes.length; i++) {
+					if (selected.quizzes[i] === questionId) {
+						selected.quizzes.splice(i, 1);
+					}
+				}
+
+				let lastModified = Timestamp.now();
+				try {
+					const questionRef = doc(db, 'stack', stackSnapshotId);
+					await updateDoc(questionRef, {
+						quizzes: selected.quizzes,
+						lastModified: quizQuestion.lastModified
+					});
+
+					console.log('stack updated with ID:', stackSnapshotId);
+				} catch (error) {
+					console.error('Error updating stack:', error);
+				}
+			} else {
+				console.log('Stack was empty...');
+			}
+			toggleEditField(0, true);
 		}
 	}
 
@@ -219,10 +345,9 @@
 						{#each $existingQuizQuestions as quizQuestion, index}
 							{#if quizQuestion.creatorID === $user.uid}
 								<p>
-									<Button color="danger" on:click={() => deleteQuizQuestion(quizQuestion.id)}
-										>Delete</Button
+									<Button color="primary" on:click={() => toggleEditField(index, false)}
+										>Edit</Button
 									>
-									<Button color="primary" on:click={() => toggleEditField(index)}>Edit</Button>
 									{quizQuestion.question}
 								</p>
 								{#if editField[index]}
@@ -234,6 +359,10 @@
 										{initializeUpdatedFalseAnswer1(quizQuestion.listOfFalseAnswers[1])}
 										{initializeUpdatedFalseAnswer2(quizQuestion.listOfFalseAnswers[2])}
 									</p>
+									<Button color="danger" on:click={() => deleteQuizQuestion(quizQuestion.id)}
+										>Delete this Question</Button
+									>
+									<br />
 									<FormGroup>
 										<Label for="question">Question:</Label>
 										<Input
@@ -286,22 +415,27 @@
 									<FormGroup>
 										<Label for="Current Question Stack">Current Question Stack:</Label>
 										{#if !stackView}
-										<p style="display: none;"> {getCurrentStackName()} </p>
-										<p> {stackName}  <Button color="warning" on:click={() => toggleStackView(true)}>Change Stack</Button></p>  
+											<p style="display: none;">{getCurrentStackName()}</p>
+											<p>
+												{stackName}
+												<Button color="warning" on:click={() => toggleStackView(true)}
+													>Change Stack</Button
+												>
+											</p>
 										{:else}
-										<br />
-										<p style="display: none;">{resetSelectedStack()}</p>
-										<select bind:value={selected}>
-											{#each $stacks as stack}
-												<option value={stack}>
-													{stack.name}
-												</option>
-											{/each}
-										</select>
+											<br />
+											<p style="display: none;">{resetSelectedStack()}</p>
+											<select bind:value={selected}>
+												{#each $stacks as stack}
+													<option value={stack}>
+														{stack.name}
+													</option>
+												{/each}
+											</select>
 										{/if}
 									</FormGroup>
-									
-									<Button on:click={() => updateQuizQuestion()} color="primary"
+
+									<Button on:click={() => updateQuizQuestion()} color="success"
 										>Update Quiz Question</Button
 									>
 									<br /><br />
