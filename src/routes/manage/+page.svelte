@@ -2,11 +2,22 @@
 	import { goto } from '$app/navigation';
 	import { auth, db } from '$lib/firebase/firebase';
 	import { userStore, collectionStore } from 'sveltefire';
-	import { collection, getCountFromServer, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
+	import {
+		collection,
+		getCountFromServer,
+		doc,
+		deleteDoc,
+		updateDoc,
+		Timestamp,
+		query,
+		where,
+		getDocs
+	} from 'firebase/firestore';
 	import { Button, FormGroup, Label, Input } from 'sveltestrap';
-	import type { quiz } from '$lib/utils/db.d.ts';
+	import type { quiz, stack } from '$lib/utils/db.d.ts';
 	import '$lib/main.css';
-	
+	import { element } from 'svelte/internal';
+
 	function redirectLogin(
 		event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }
 	): any {
@@ -62,9 +73,14 @@
 	}
 	//#endregion
 
+	const stacks = collectionStore<stack>(db, 'stack');
+	let selected: any;
+	selected = '';
+	let stackName: string = '';
 	const existingQuizQuestions = collectionStore<quiz>(db, 'quiz');
 	const existingQuizQuestionsForSize = collection(db, 'quiz');
 	const user = userStore(auth);
+	let value = '';
 	let editField: any;
 	let quizQuestion: quiz = {
 		correctAnswer: '',
@@ -99,6 +115,43 @@
 			}
 			editField[index] = true;
 		}
+		toggleStackView(false);
+	}
+	let stackView: boolean = false;
+	function toggleStackView(switchle:Boolean)
+{
+	if (switchle){
+		stackView = true;
+	}
+	else{
+		stackView = false;
+	}
+	
+}
+
+	async function getCurrentStackName() {
+		let valid: number = 0;
+
+		let stackSnapshot: any;
+		console.log('ich frage nach id: ', updatedQuestionID);
+		const testQuery = query(
+			collection(db, 'stack'),
+			where('quizzes', 'array-contains', updatedQuestionID)
+		);
+		const querySnapshot = await getDocs(testQuery);
+
+		querySnapshot.forEach((doc) => {
+			valid++;
+			let result = (doc.id, ' => ', doc.data());
+			stackName = result.name;
+			stackSnapshot = result;
+		});
+		if (valid < 1) {
+			stackName = 'No valid stack!';
+		} else if (valid > 1) {
+			alert('This should not happen - ' + valid + ' stacks were found. Please contact an administrator');
+			stackName = 'No valid stack!';
+		} 
 	}
 
 	async function updateQuizQuestion() {
@@ -114,36 +167,41 @@
 
 			console.log('Quiz question updated with ID:', updatedQuestionID);
 			resetForm();
-
 		} catch (error) {
 			console.error('Error creating/updating quiz question:', error);
 		}
 	}
 
 	async function deleteQuizQuestion(questionId: string) {
-		if (confirm("You are sure you want to delete this question?")){
-		try {
-			const questionRef = doc(db, 'quiz', questionId);
-			await deleteDoc(questionRef);
-			console.log('Quiz question deleted with ID:', questionId);
-		} catch (error) {
-			console.error('Error deleting quiz question:', error);
+		if (confirm('You are sure you want to delete this question?')) {
+			try {
+				const questionRef = doc(db, 'quiz', questionId);
+				await deleteDoc(questionRef);
+				console.log('Quiz question deleted with ID:', questionId);
+			} catch (error) {
+				console.error('Error deleting quiz question:', error);
 
-			//After delete -> close all open questions
-			for (let i = 0; i < editField.length; i++) {
-				if (editField[i] === true) {
-					editField[i] = false;
+				//After delete -> close all open questions
+				for (let i = 0; i < editField.length; i++) {
+					if (editField[i] === true) {
+						editField[i] = false;
+					}
 				}
 			}
 		}
 	}
-}
 
 	function resetForm() {
 		quizQuestion.question = '';
 		quizQuestion.listOfFalseAnswers = ['', '', ''];
 		quizQuestion.correctAnswer = '';
+		toggleStackView(false);
 	}
+	function resetSelectedStack() {
+		selected = '';
+	}
+
+	$: console.log('Selected stack:', selected);
 </script>
 
 <html lang="en">
@@ -169,7 +227,6 @@
 								</p>
 								{#if editField[index]}
 									<p style="display: none;">
-										This is a special workaround... I'm not a JS-developer...
 										{initializeUpdatedQuestion(quizQuestion.question)}
 										{initializeUpdatedQuestionID(quizQuestion.id)}
 										{initializeUpdatedCorrectAnswer(quizQuestion.correctAnswer)}
@@ -226,7 +283,24 @@
 											on:input={handleInputChangeUpdatedFalseAnswer2}
 										/>
 									</FormGroup>
-
+									<FormGroup>
+										<Label for="Current Question Stack">Current Question Stack:</Label>
+										{#if !stackView}
+										<p style="display: none;"> {getCurrentStackName()} </p>
+										<p> {stackName}  <Button color="warning" on:click={() => toggleStackView(true)}>Change Stack</Button></p>  
+										{:else}
+										<br />
+										<p style="display: none;">{resetSelectedStack()}</p>
+										<select bind:value={selected}>
+											{#each $stacks as stack}
+												<option value={stack}>
+													{stack.name}
+												</option>
+											{/each}
+										</select>
+										{/if}
+									</FormGroup>
+									
 									<Button on:click={() => updateQuizQuestion()} color="primary"
 										>Update Quiz Question</Button
 									>

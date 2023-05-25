@@ -27,6 +27,7 @@
 	let editingQuestion: quiz | null = null;
 
 	let selected: any;
+	selected = '';
 	let updatedQuizzes: Array<String>;
 	let createdQuizID: string;
 
