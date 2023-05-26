@@ -3,10 +3,13 @@
 	import { Doc } from 'sveltefire';
 	import { db } from '$lib/firebase/firebase';
 	import { collection, getDocs, query, where } from 'firebase/firestore';
+	import { onMount } from 'svelte';
 
 	export let lobbyID: string;
 	export let user: any;
 	export let gameInProgress: boolean;
+	export let gameMode: string;
+	export let questionStacks: string[];
  
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
@@ -31,10 +34,10 @@
       const success = await response.json();
 
       if (response.ok && success) {
+				lobbyID = "";
         
         setTimeout(() => {
 					gameInProgress = false;
-					lobbyID = "";					
 				}, 2000)
         console.log('Left the lobby.');
       }
@@ -66,7 +69,11 @@
 		}, 1000);
 	}
 
+
 	function checkAnswer() {
+		// stop countdown
+		clearInterval(countdownIntervalID);
+
 		if (selectedAnswer) {
 			if (selectedAnswer === 42) {
 			  score++;
@@ -89,13 +96,12 @@
 
 	let quizQuestions: any;
 
-  async function buildQuery(qStacks: any) {
+  async function fetchQuizData(qStacks: any) {
 		const stacksQuery = query(collection(db, 'stack'), where('__name__', 'in', qStacks));
 		const stacksSnapshot = await getDocs(stacksQuery);
 		let stacksNestedData = stacksSnapshot.docs.map(doc => doc.data().quizzes);
 		let stacksQuizIDs: any[] = [];
 		for (const id of stacksNestedData[0]) {
-			console.log(id);
 			stacksQuizIDs.push(id);
 		}
 
@@ -109,16 +115,16 @@
 		console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
 	});
 
-	function initializeGame(questionStacks: string[]) {
-		buildQuery(questionStacks);
+	onMount(async () => {
+		fetchQuizData(questionStacks);
 		startGame();
-	}
+	})
 </script>
 
 <div>
 	<Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
 		{#if !quizQuestions}
-			<Button on:click={() => initializeGame(lobbyData.questionStacks)}>Ready!</Button>
+			<p>starting...</p>
 		{:else}
 			{#if currentQuestion < quizQuestions.length && currentQuestion < 6}
 				<h2>Question {currentQuestion + 1}</h2>

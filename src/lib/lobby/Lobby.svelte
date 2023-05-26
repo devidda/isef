@@ -5,6 +5,7 @@
 	import PreLobby from './PreLobby.svelte';
 	import LobbyDashboard from './LobbyDashboard.svelte';
 	import Game from '$lib/game/Game.svelte';
+	import Layout from '../../routes/+layout.svelte';
 
   let gameInProgress = false;
   let selectedStacks: string[] = [];
@@ -80,8 +81,10 @@
       Leaving lobby...
     {:else}
       {#if lobbyID}
-        {#if gameInProgress}
-          <Game bind:lobbyID={lobbyID} user={loggedInUser} bind:gameInProgress={gameInProgress} />
+        <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
+
+        {#if lobbyData.status === "GAMING"}
+          <Game bind:lobbyID={lobbyID} user={loggedInUser} gameMode={lobbyData.gameMode} bind:gameInProgress={gameInProgress} questionStacks={lobbyData.questionStacks} />
         {:else}
           <LobbyDashboard bind:lobbyID={lobbyID} loggedInUser={loggedInUser} bind:selectedStacks={selectedStacks} />
             <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
@@ -89,6 +92,7 @@
             </Doc>
           <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
         {/if}
+      </Doc>
       {:else}
         <PreLobby loggedInUser={loggedInUser} bind:lobbyID={lobbyID} currentlyLeavingLobby={currentlyLeavingLobby} />
       {/if}
