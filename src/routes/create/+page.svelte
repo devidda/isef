@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth, db } from '$lib/firebase/firebase';
-	import { userStore } from 'sveltefire';
-	import { collection, addDoc, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
+	import { userStore, collectionStore } from 'sveltefire';
+	import { collection, addDoc, Timestamp, doc, updateDoc } from 'firebase/firestore';
 	import { Button, FormGroup, Label, Input } from 'sveltestrap';
 	import '$lib/main.css';
-	import type { quiz } from '$lib/utils/db.d.ts';
+	import type { quiz, stack } from '$lib/utils/db.d.ts';
 
 	function redirectLogin(
 		event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }
@@ -26,36 +26,71 @@
 	};
 	let editingQuestion: quiz | null = null;
 
+	let selected: any;
+	selected = '';
+	let updatedQuizzes: Array<String>;
+	let createdQuizID: string;
+
+	const stacks = collectionStore<stack>(db, 'stack');
 	async function createQuizQuestion() {
-		quizQuestion.lastModified = Timestamp.now();
-		try {
-			// Create new question
-			if ($user !== null) {
-				console.log('Question:', quizQuestion.question);
-				console.log('listOfFalseAnswers:', quizQuestion.listOfFalseAnswers);
-				const docRef = await addDoc(collection(db, 'quiz'), {
-					correctAnswer: quizQuestion.correctAnswer,
-					difficulty: quizQuestion.difficulty,
-					lastModified: quizQuestion.lastModified,
-					listOfFalseAnswers: quizQuestion.listOfFalseAnswers,
-					question: quizQuestion.question,
-					tags: quizQuestion.tags,
-					creatorID: $user.uid
-				});
-				console.log('Quiz question created with ID:', docRef.id);
+		if (
+			!quizQuestion.question ||
+			!quizQuestion.listOfFalseAnswers[0] ||
+			!quizQuestion.listOfFalseAnswers[1] ||
+			!quizQuestion.listOfFalseAnswers[2] ||
+			!quizQuestion.correctAnswer ||
+			!selected
+		) {
+			alert('Please fill in all required fields');
+		} else {
+			quizQuestion.lastModified = Timestamp.now();
+			try {
+				// Create new question
+				if ($user !== null) {
+					console.log('Question:', quizQuestion.question);
+					console.log('listOfFalseAnswers:', quizQuestion.listOfFalseAnswers);
+					const docRef = await addDoc(collection(db, 'quiz'), {
+						correctAnswer: quizQuestion.correctAnswer,
+						difficulty: quizQuestion.difficulty,
+						lastModified: quizQuestion.lastModified,
+						listOfFalseAnswers: quizQuestion.listOfFalseAnswers,
+						question: quizQuestion.question,
+						tags: quizQuestion.tags,
+						creatorID: $user.uid
+					});
+					console.log('Quiz question created with ID:', docRef.id);
+					createdQuizID = docRef.id;
+				}
+				resetForm();
+			} catch (error) {
+				console.error('Error creating quiz question:', error);
 			}
-			resetForm();
-		} catch (error) {
-			console.error('Error creating/updating quiz question:', error);
+			try {
+				// Update the stack
+				updatedQuizzes = selected.quizzes;
+				updatedQuizzes.push(createdQuizID);
+				const questionRef = doc(db, 'stack', selected.id);
+				await updateDoc(questionRef, {
+					name: selected.name,
+					quizzes: updatedQuizzes,
+					lastModified: quizQuestion.lastModified
+				});
+
+				console.log('stack updated with ID:', questionRef.id);
+			} catch (error) {
+				console.error('Error updating stack:', error);
+			}
+		}
+
+		function resetForm() {
+			quizQuestion.question = '';
+			quizQuestion.listOfFalseAnswers = ['', '', ''];
+			quizQuestion.correctAnswer = '';
+			editingQuestion = null;
 		}
 	}
-
-	function resetForm() {
-		quizQuestion.question = '';
-		quizQuestion.listOfFalseAnswers = ['', '', ''];
-		quizQuestion.correctAnswer = '';
-		editingQuestion = null;
-	}
+	
+	$: console.log('Selected stack:', selected);
 </script>
 
 <html lang="en">
@@ -90,6 +125,15 @@
 									/>
 								</FormGroup>
 							{/each}
+							<select bind:value={selected}>
+								{#each $stacks as stack}
+									<option value={stack}>
+										{stack.name}
+									</option>
+								{/each}
+							</select>
+							<br />
+							<br />
 							<Button type="submit" color="primary">Create Quiz Question</Button>
 						</form>
 					</main>
