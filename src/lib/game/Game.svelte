@@ -92,11 +92,12 @@
   async function buildQuery(qStacks: any) {
 		const stacksQuery = query(collection(db, 'stack'), where('__name__', 'in', qStacks));
 		const stacksSnapshot = await getDocs(stacksQuery);
-		let stacksNestedData = stacksSnapshot.docs.map((doc) => doc.data().quizzes);
+		let stacksNestedData = stacksSnapshot.docs.map(doc => doc.data().quizzes);
 		let stacksQuizIDs: any[] = [];
-		stacksNestedData.forEach(function (item, index) {
-			stacksQuizIDs[index] = item[0];
-		})
+		for (const id of stacksNestedData[0]) {
+			console.log(id);
+			stacksQuizIDs.push(id);
+		}
 
     const quizzesQuery = query(collection(db, 'quiz'), where('__name__', 'in', stacksQuizIDs));
 		let snap2quizzesSnapshot = await getDocs(quizzesQuery);
