@@ -20,7 +20,8 @@ export const POST = (async ({ request }) => {
     await setDoc(doc(db, 'lobby', uid), {
       gameMode: 'SOLO',
       listOfUsers: [uid],
-      status: 'SETUP'
+      status: 'SETUP',
+      questionStacks: []
     });
 
     return json(true);

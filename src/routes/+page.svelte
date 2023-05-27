@@ -16,11 +16,6 @@
 	function redirectLogin(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
     goto("/login")
 	}
-
-	function testQueries(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }): any {
-    goto("/testQueries")
-	}
-
 </script>
 
 {#if $user}
@@ -31,7 +26,6 @@
 		<!-- existing user -->
 		<p>Welcome back {$user.displayName}!</p>
 	{/if}
-	<p>Your UserID is {$user.uid}</p>
 {:else}
 	<p>
     Welcome to our prototype of a quiz application!

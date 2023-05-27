@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Collection } from 'sveltefire';
+  import { Collection, Doc } from 'sveltefire';
 	import type { User } from 'sveltefire';
   import { Button, ListGroup, ListGroupItem, FormGroup, Label, Input } from 'sveltestrap';
   export let loggedInUser: any;
@@ -63,12 +63,14 @@
     <ListGroup>
       {#if !currentlyLeavingLobby}
         {#each allLobbies as lobby}
-          {#if (lobby.id === loggedInUser.uid || loggedInUser.uid in lobby.listOfUsers)}
+          {#if (lobby.listOfUsers.indexOf(loggedInUser.uid) > -1)}
             {void rejoinLobby(lobby.id) ?? ""}
           {/if}
           <ListGroupItem on:click={() => joinLobby(loggedInUser.uid, lobby.id)}>
-            {lobby.id}
-            Game Mode: {lobby.gameMode}
+            <Doc ref={`user/${lobby.id}`} let:data={lobbyCreator}>
+              {lobbyCreator.username}'s lobby: 
+            </Doc>
+            Mode: {lobby.gameMode}, 
             Player Count: {lobby.listOfUsers.length}
           </ListGroupItem>
         {/each}

@@ -14,10 +14,12 @@
 	const COUNTDOWN_LIMIT = 20;
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
-	let correctAnswer: boolean | null = null;
-	let score = 0;
+	let answerIsCorrect: boolean | null = null;
+	let personalScore = 0;
 	let countdown = COUNTDOWN_LIMIT;
 	let countdownIntervalID: any = null;
+	let quizQuestions: any;
+
 
 	async function leaveLobby(): Promise<void> {
 		try {
@@ -50,10 +52,10 @@
 
 	function startGame() {
 		countdown = COUNTDOWN_LIMIT;
-		score = 0;
+		personalScore = 0;
 		currentQuestion = 0;
 		selectedAnswer = null;
-		correctAnswer = null;
+		answerIsCorrect = null;
 		startCountdown();
 	}
 
@@ -110,10 +112,10 @@
 
 		if (selectedAnswer) {
 			if (selectedAnswer === 42) {
-				score++;
-				correctAnswer = true;
+				personalScore++;
+				answerIsCorrect = true;
 			} else {
-				correctAnswer = false;
+				answerIsCorrect = false;
 			}
 		}
 
@@ -128,6 +130,9 @@
 		const lobbyDocRef = doc(db, 'lobby', lobbyID);
 		const lobbySnapshot = await getDoc(lobbyDocRef);
 		const lobbyData = lobbySnapshot.data();
+		if (lobbyData === undefined) {
+			throw new Error('Error getting information about the lobby.');
+		}
 
 		const playerCount = Object.keys(lobbyData.listOfUsers).length;
 		const voteCount = Object.values(lobbyData.playerVotes).filter((vote: any) => vote !== null).length;
@@ -159,7 +164,7 @@
 		currentQuestion++;
 		countdown = COUNTDOWN_LIMIT;
 		selectedAnswer = null;
-		correctAnswer = null;
+		answerIsCorrect = null;
 		// playerVotes = {};
 
 		if (gameMode === 'COOP') {
@@ -168,8 +173,6 @@
 
 		startCountdown();
 	}
-
-	let quizQuestions: any;
 
 	async function fetchQuizData(qStacks: any) {
 		const stacksQuery = query(collection(db, 'stack'), where('__name__', 'in', qStacks));
@@ -245,17 +248,19 @@
 					<button on:click={() => voteForAnswer()} disabled={lobbyData.playerVotes[user.uid] !== undefined}>Vote</button>
 				{/if}
 
-				{#if correctAnswer === true}
+				{#if answerIsCorrect === true}
 					<div class="alert alert-success" role="alert">Correct answer!</div>
-				{:else if correctAnswer === false}
+				{:else if answerIsCorrect === false}
 					<div class="alert alert-danger" role="alert">Incorrect answer!</div>
 				{/if}
 
 				<Progress value={countdown} max={20} animated striped />
 			{:else}
 				<p>Game Over!</p>
-				<p>You've answered {score} of {quizQuestions.length} questions correctly.</p>
-				<p>Your team answered {lobbyData.score} of {quizQuestions.length} questions correctly together.</p>
+				<p>You've answered {personalScore} of {quizQuestions.length} questions correctly.</p>
+				{#if gameMode === 'COOP'}
+					<p>Your team answered {lobbyData.score} of {quizQuestions.length} questions correctly together.</p>
+				{/if}
 				<div>
 					<Button on:click={() => leaveLobby()}>Leave Game</Button>
 				</div>
