@@ -1,10 +1,9 @@
-<div class="container-background">
-    <div class="card text-black ">
       <div class="card-header">
         <h1>About</h1>
       </div>
+      <br>
       <p class="card-text">Here is some space for the Impressum etc!</p>
-    </div>
-</div>
+      <br>
+      <p class="card-text">Have fun playing!</p>
 
 

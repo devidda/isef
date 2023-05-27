@@ -95,14 +95,14 @@
 
 <html lang="en">
 	<body>
-		<div class="container-background">
-			<div class="card text-black">
+		
 				<div class="card-header">
 					<h1>Quiz Questions</h1>
 				</div>
 				{#if $user !== null}
 					<main>
-						<h3>Create your own Quiz Questions</h3>
+						<br>
+						<p>Create your own Quiz Questions</p>
 
 						<form on:submit|preventDefault={createQuizQuestion}>
 							<FormGroup>
@@ -142,7 +142,7 @@
 					<p>Please log in to create your own quiz questions.</p>
 					<button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
 				{/if}
-			</div>
-		</div>
+			
+		
 	</body>
 </html>

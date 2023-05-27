@@ -11,13 +11,11 @@
 
 <html lang="en">
   <body>
-    <div class="container-background">
-    <div class="card text-black ">
+
       <div class="card-header">
         <h1>Login</h1>
       </div>
-    </div>
-    </div>
+   
 
     <div>
       {#if wantsToSignup}
