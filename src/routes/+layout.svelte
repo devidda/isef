@@ -14,12 +14,10 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" href="/about">About</a>
-      </li>
+      
       {#if !$user}
-      <li class="nav-item"> 
-        <a class="nav-link" href="/login">Login</a>
+      <li class="nav-item ml-auto"> 
+        <a class="btn btn-outline-secondary" href="/login">Login</a>
       </li> 
       {:else}
       <li class="nav-item">
@@ -29,6 +27,9 @@
         <a class="nav-link" href="/manage">Edit Quiz Questions</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" href="/about">About</a>
+      </li>
+      <li class="nav-item ml-auto">
         <button class="btn btn-outline-secondary" on:click={signOut}>Sign Out</button>
       </li>
       {/if}
