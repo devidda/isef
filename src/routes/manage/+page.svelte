@@ -332,16 +332,15 @@
 
 <html lang="en">
 	<body>
-		<div class="container-background">
-			<div class="card text-black">
+		
 				<div class="card-header">
 					<h1>Edit and delete Quiz Questions</h1>
 				</div>
 
 				{#if $user !== null}
 					<main>
-						<h3>Feel free to edit or delete your own Questions</h3>
-						<br />
+						<p>Feel free to edit or delete your own Questions</p>
+						<br/>
 						{#each $existingQuizQuestions as quizQuestion, index}
 							{#if quizQuestion.creatorID === $user.uid}
 								<p>
@@ -448,7 +447,5 @@
 					<p>Please log in to create your own quiz questions.</p>
 					<button class="btn btn-light" on:click={redirectLogin}>Let me in! 🚀</button>
 				{/if}
-			</div>
-		</div>
 	</body>
 </html>
