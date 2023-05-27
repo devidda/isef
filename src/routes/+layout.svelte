@@ -16,7 +16,7 @@
     <ul class="navbar-nav ml-auto">
       
       {#if !$user}
-      <li class="nav-item ml-auto"> 
+      <li class="nav-itemLS ml-auto"> 
         <a class="btn btn-outline-secondary" href="/login">Login</a>
       </li> 
       {:else}
@@ -29,7 +29,7 @@
       <li class="nav-item">
         <a class="nav-link" href="/about">About</a>
       </li>
-      <li class="nav-item ml-auto">
+      <li class="nav-itemLS ml-auto">
         <button class="btn btn-outline-secondary" on:click={signOut}>Sign Out</button>
       </li>
       {/if}

@@ -5,6 +5,9 @@
   margin-top: 0px;
 }
 
+.nav-itemLS{
+  margin-left: 10px;
+}
 .lobby-container {
   display: flex;
   flex-direction: row;
