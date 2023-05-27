@@ -11,8 +11,8 @@ export const config: Config = {
 export const POST = (async ({ request }) => {
   try {
     // get data from request
-    const { selectedMode, selectedStacks, lobbyID } = await request.json();
-    if (!selectedMode || !lobbyID) {
+    const { selectedMode, selectedStacks, lobbyID, timeLimit } = await request.json();
+    if (!selectedMode || !lobbyID || !timeLimit) {
       throw new Error('One of the parameters has been failed to delivered!')
     }
 
@@ -21,7 +21,8 @@ export const POST = (async ({ request }) => {
     if (lobbyRef) {
       await updateDoc(lobbyRef, {
         questionStacks: selectedStacks,
-        gameMode: selectedMode
+        gameMode: selectedMode,
+        timeLimit: timeLimit
       });
     } else {
       throw new Error('An error occured when using the reference to the lobby.');

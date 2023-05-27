@@ -6,8 +6,9 @@
   export let loggedInUser: any;
   export let selectedStacks: string[];
 
-  const gameModes: string[] = ['Singleplayer', 'Team Coop', 'Team Versus'];
+  const gameModes: string[] = ['SOLO', 'COOP', 'VERSUS'];
   let selectedMode: string = gameModes[0];
+  let timeLimit = 15;
 
 
   async function saveSettings(): Promise<void> {
@@ -15,7 +16,7 @@
       // call server function to update lobby settings in Firestore
       const response = await fetch('/api/saveLobbySettings', {
           method: 'POST',
-          body: JSON.stringify({ selectedMode, selectedStacks, lobbyID }),
+          body: JSON.stringify({ selectedMode, selectedStacks, lobbyID, timeLimit }),
           headers: {
               'content-type': 'application/json'
           }
@@ -61,6 +62,8 @@
         </Input>
       </FormGroup>
       {#if activeLobby.listOfUsers[0] === loggedInUser.uid}
+        <p>Enter time limit per question between 6 and 30 seconds:</p>
+        <Input type="number" bind:value={timeLimit} min=6 max=30/>
         <p>Select quiz question stacks:</p>
         <Collection ref={'stack'} let:data>
           <ListGroup>
