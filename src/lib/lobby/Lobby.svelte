@@ -83,7 +83,7 @@
         <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
 
         {#if lobbyData.status === "GAMING"}
-          <Game bind:lobbyID={lobbyID} user={loggedInUser} gameMode={lobbyData.gameMode} bind:gameInProgress={gameInProgress} questionStacks={lobbyData.questionStacks} />
+          <Game COUNTDOWN_LIMIT={lobbyData.timeLimit} bind:lobbyID={lobbyID} user={loggedInUser} gameMode={lobbyData.gameMode} bind:gameInProgress={gameInProgress} questionStacks={lobbyData.questionStacks} />
         {:else}
           <LobbyDashboard bind:lobbyID={lobbyID} loggedInUser={loggedInUser} bind:selectedStacks={selectedStacks} />
             <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>

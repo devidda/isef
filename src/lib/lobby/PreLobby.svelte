@@ -59,21 +59,27 @@
 <div class="pre-lobby-container">
   <Button class="create-lobby-button" color="primary" on:click={() => createOwnLobby(loggedInUser.uid)}>Create own game</Button>
   <Collection ref={'lobby'} let:data={allLobbies} let:count={lobbyCount}>
-    <p>There {lobbyCount === 1 ? 'is' : 'are'} {lobbyCount} {lobbyCount === 1 ? 'lobby' : 'lobbies'} available. Click to select:</p>
+    <p>There {lobbyCount === 1 ? 'is' : 'are'} {lobbyCount} {lobbyCount === 1 ? 'lobby' : 'lobbies'} online. {lobbyCount === 1 ? 'This one is' : 'These ones are'} in the setup-phase and joinable:</p>
     <ListGroup>
       {#if !currentlyLeavingLobby}
         {#each allLobbies as lobby}
           {#if (lobby.listOfUsers.indexOf(loggedInUser.uid) > -1)}
             {void rejoinLobby(lobby.id) ?? ""}
           {/if}
-          <ListGroupItem on:click={() => joinLobby(loggedInUser.uid, lobby.id)}>
-            <Doc ref={`user/${lobby.id}`} let:data={lobbyCreator}>
-              {lobbyCreator.username}'s lobby: 
-            </Doc>
-            Mode: {lobby.gameMode}, 
-            Player Count: {lobby.listOfUsers.length}
-          </ListGroupItem>
+          {#if lobby.status === "SETUP"}
+            <ListGroupItem on:click={() => joinLobby(loggedInUser.uid, lobby.id)}>
+              <Doc ref={`user/${lobby.id}`} let:data={lobbyCreator}>
+                {lobbyCreator.username}'s lobby: 
+              </Doc>
+              Mode: {lobby.gameMode}, 
+              Player Count: {lobby.listOfUsers.length}
+            </ListGroupItem>
+          {/if}
         {/each}
+        <p>
+          Prototype Info: There is a bug that a newly created lobby get's displayed with a false name: 
+          If you see something like duplicated names in the lobby list, please reload the page.
+        </p>
       {/if}
     </ListGroup>
   </Collection>

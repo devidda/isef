@@ -21,7 +21,8 @@ export const POST = (async ({ request }) => {
       gameMode: 'SOLO',
       listOfUsers: [uid],
       status: 'SETUP',
-      questionStacks: []
+      questionStacks: [],
+      timeLimit: 15
     });
 
     return json(true);

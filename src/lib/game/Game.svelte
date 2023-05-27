@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Button, Progress } from 'sveltestrap';
-	import { Doc, Collection } from 'sveltefire';
+	import { Doc } from 'sveltefire';
 	import { db } from '$lib/firebase/firebase';
-	import { collection, getDocs, query, where, updateDoc, doc, getDoc, arrayUnion } from 'firebase/firestore';
+	import { collection, getDocs, query, where, updateDoc, doc, getDoc } from 'firebase/firestore';
 	import { onMount } from 'svelte';
 
 	export let lobbyID: string;
@@ -10,8 +10,8 @@
 	export let gameInProgress: boolean;
 	export let gameMode: string;
 	export let questionStacks: string[];
+	export let COUNTDOWN_LIMIT: number;
 
-	const COUNTDOWN_LIMIT = 20;
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
 	let answerIsCorrect: boolean | null = null;

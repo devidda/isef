@@ -26,11 +26,13 @@ interface quiz {
 }
 
 interface lobby {
-	chatMessages: string;
 	gameMode: string;
 	listOfUsers: Array;
-	team1: Array;
-	team2: Array;
+	timeLimit: number;
+	playerVotes: Map;
+	questionStacks: Array;
+	status: string;
+	score: number;
 }
 
 interface chatMessage {
