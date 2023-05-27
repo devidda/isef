@@ -18,7 +18,7 @@ export const POST = (async ({ request }) => {
 
     // add new user to firestore
     await setDoc(doc(db, 'lobby', uid), {
-      gameMode: 'solo',
+      gameMode: 'SOLO',
       listOfUsers: [uid],
       status: 'SETUP'
     });

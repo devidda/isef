@@ -5,7 +5,6 @@
 	import PreLobby from './PreLobby.svelte';
 	import LobbyDashboard from './LobbyDashboard.svelte';
 	import Game from '$lib/game/Game.svelte';
-	import Layout from '../../routes/+layout.svelte';
 
   let gameInProgress = false;
   let selectedStacks: string[] = [];

@@ -20,7 +20,9 @@ export const POST = (async ({ request }) => {
 
     if (lobbyRef) {
       await updateDoc(lobbyRef, {
-        status: 'GAMING'
+        status: 'GAMING',
+        playerVotes: {},
+        score: 0
       });
     } else {
       throw new Error('An error occured when using the reference to the lobby.');

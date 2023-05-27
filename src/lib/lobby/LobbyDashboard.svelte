@@ -6,7 +6,7 @@
   export let loggedInUser: any;
   export let selectedStacks: string[];
 
-  const gameModes: string[] = ['Singleplayer', 'Team Coop', 'Team Versus'];
+  const gameModes: string[] = ['SOLO', 'COOP', 'VERSUS'];
   let selectedMode: string = gameModes[0];
 
 
