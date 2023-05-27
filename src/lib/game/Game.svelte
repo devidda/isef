@@ -2,54 +2,60 @@
 	import { Button, Progress } from 'sveltestrap';
 	import { Doc } from 'sveltefire';
 	import { db } from '$lib/firebase/firebase';
-	import { collection, getDocs, query, where } from 'firebase/firestore';
+	import { collection, getDocs, query, where, updateDoc, doc, getDoc } from 'firebase/firestore';
+	import { onMount } from 'svelte';
 
 	export let lobbyID: string;
 	export let user: any;
 	export let gameInProgress: boolean;
- 
+	export let gameMode: string;
+	export let questionStacks: string[];
+	export let COUNTDOWN_LIMIT: number;
+
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
-	let correctAnswer: boolean | null = null;
-	let score = 0;
-	let countdown = 20;
+	let answerIsCorrect: boolean | null = null;
+	let personalScore = 0;
+	let countdown = COUNTDOWN_LIMIT;
 	let countdownIntervalID: any = null;
+	let quizQuestions: any;
+
 
 	async function leaveLobby(): Promise<void> {
-    try {
-      const lobbyToLeaveID = lobbyID;
+		try {
+			const lobbyToLeaveID = lobbyID;
 			const uid = user.uid;
 
-      // call server function to add user to Firestore
-      const response = await fetch('/api/leaveLobby', {
-          method: 'POST',
-          body: JSON.stringify({ uid, lobbyToLeaveID }),
-          headers: {
-              'content-type': 'application/json'
-          }
-      });
-      const success = await response.json();
+			// call server function to remove user from Firestore lobby
+			const response = await fetch('/api/leaveLobby', {
+				method: 'POST',
+				body: JSON.stringify({ uid, lobbyToLeaveID }),
+				headers: {
+					'content-type': 'application/json'
+				}
+			});
+			const success = await response.json();
 
-      if (response.ok && success) {
-        
-        setTimeout(() => {
+			if (response.ok && success) {
+				lobbyID = "";
+
+				setTimeout(() => {
 					gameInProgress = false;
-					lobbyID = "";					
-				}, 2000)
-        console.log('Left the lobby.');
-      }
-    } catch (error) {
-      const typedError = error as Error
-      alert("Error leaving lobby: " +  typedError.message);
-    }
+				}, 2000);
+				console.log('Left the lobby.');
+			}
+		} catch (error) {
+			const typedError = error as Error;
+			alert("Error leaving lobby: " + typedError.message);
+		}
 	}
 
 	function startGame() {
-		countdown = 20;
-		score = 0;
+		countdown = COUNTDOWN_LIMIT;
+		personalScore = 0;
 		currentQuestion = 0;
 		selectedAnswer = null;
-		correctAnswer = null;
+		answerIsCorrect = null;
 		startCountdown();
 	}
 
@@ -61,44 +67,123 @@
 			countdown--;
 			if (countdown === 0) {
 				clearInterval(countdownIntervalID);
-				checkAnswer();
+				if (gameMode === 'SOLO') {
+					checkAnswer();
+				} else if (gameMode === 'COOP') {
+					voteForAnswer();
+					checkAnswer();
+				}
 			}
 		}, 1000);
 	}
 
-	function checkAnswer() {
+	function voteForAnswer() {
+		if (! Number.isInteger(selectedAnswer)) {
+			selectedAnswer = 99;
+		}
+		updatePlayerVotesInFirestore();
+	}
+
+	async function updatePlayerVotesInFirestore() {
+		try {
+			const lobbyDocRef = doc(db, 'lobby', lobbyID);
+			await updateDoc(lobbyDocRef, { 
+				[`playerVotes.${user.uid}`]: selectedAnswer,
+			});
+		} catch (error) {
+			console.error('Error updating player votes in Firestore:', error);
+		}
+	}
+
+	async function resetPlayerVotesInFirestore() {
+		try {
+			const lobbyDocRef = doc(db, 'lobby', lobbyID);
+			await updateDoc(lobbyDocRef, { 
+				playerVotes: {},
+			});
+		} catch (error) {
+			console.error('Error resetting player votes in Firestore:', error);
+		}
+	}
+
+	async function checkAnswer() {
+		// stop countdown
+		clearInterval(countdownIntervalID);
+
 		if (selectedAnswer) {
 			if (selectedAnswer === 42) {
-			  score++;
-			  correctAnswer = true;
+				personalScore++;
+				answerIsCorrect = true;
 			} else {
-			  correctAnswer = false;
+				answerIsCorrect = false;
 			}
 		}
 
-		setTimeout(nextQuestion, 2000);
+		if (gameMode === 'SOLO') {
+			setTimeout(nextQuestion, 2000);
+		} else if (gameMode === 'COOP') {
+			await waitForVotes();
+		}
+	}
+
+	async function waitForVotes() {
+		const lobbyDocRef = doc(db, 'lobby', lobbyID);
+		const lobbySnapshot = await getDoc(lobbyDocRef);
+		const lobbyData = lobbySnapshot.data();
+		if (lobbyData === undefined) {
+			throw new Error('Error getting information about the lobby.');
+		}
+
+		const playerCount = Object.keys(lobbyData.listOfUsers).length;
+		const voteCount = Object.values(lobbyData.playerVotes).filter((vote: any) => vote !== null).length;
+
+		console.log('p', playerCount, 'v', voteCount);
+		if (playerCount === voteCount) {
+			let correctTeamVotes = 0;
+			for (const [player, vote] of Object.entries(Object.values(lobbyData.playerVotes))) {
+				if (vote === 42) {
+					correctTeamVotes += 1;
+				}
+			if (correctTeamVotes > playerCount / 2) {
+				const lobbyDocRef = doc(db, 'lobby', lobbyID);
+				const currentTeamScore = lobbyData.score;
+				await updateDoc(lobbyDocRef, { 
+					score: currentTeamScore + 1,
+				});
+			}
+			}
+			if (currentQuestion < quizQuestions.length && currentQuestion < 6) {
+				setTimeout(nextQuestion, 2000);
+			}
+		} else {
+			setTimeout(waitForVotes, 500);
+		}
 	}
 
 	function nextQuestion() {
 		currentQuestion++;
-		countdown = 20;
+		countdown = COUNTDOWN_LIMIT;
 		selectedAnswer = null;
-		correctAnswer = null;
+		answerIsCorrect = null;
+		// playerVotes = {};
+
+		if (gameMode === 'COOP') {
+			resetPlayerVotesInFirestore();
+		}
+
 		startCountdown();
 	}
 
-	let quizQuestions: any;
-
-  async function buildQuery(qStacks: any) {
+	async function fetchQuizData(qStacks: any) {
 		const stacksQuery = query(collection(db, 'stack'), where('__name__', 'in', qStacks));
 		const stacksSnapshot = await getDocs(stacksQuery);
-		let stacksNestedData = stacksSnapshot.docs.map((doc) => doc.data().quizzes);
+		let stacksNestedData = stacksSnapshot.docs.map(doc => doc.data().quizzes);
 		let stacksQuizIDs: any[] = [];
-		stacksNestedData.forEach(function (item, index) {
-			stacksQuizIDs[index] = item[0];
-		})
+		for (const id of stacksNestedData[0]) {
+			stacksQuizIDs.push(id);
+		}
 
-    const quizzesQuery = query(collection(db, 'quiz'), where('__name__', 'in', stacksQuizIDs));
+		const quizzesQuery = query(collection(db, 'quiz'), where('__name__', 'in', stacksQuizIDs));
 		let snap2quizzesSnapshot = await getDocs(quizzesQuery);
 
 		quizQuestions = snap2quizzesSnapshot.docs.map(doc => doc.data());
@@ -108,62 +193,74 @@
 		console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
 	});
 
-	function initializeGame(questionStacks: string[]) {
-		buildQuery(questionStacks);
+	onMount(async () => {
+		fetchQuizData(questionStacks);
 		startGame();
-	}
+	})
 </script>
 
 <div>
 	<Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
 		{#if !quizQuestions}
-			<Button on:click={() => initializeGame(lobbyData.questionStacks)}>Ready!</Button>
+			<p>starting...</p>
 		{:else}
 			{#if currentQuestion < quizQuestions.length && currentQuestion < 6}
 				<h2>Question {currentQuestion + 1}</h2>
 				<p>{quizQuestions[currentQuestion].question}</p>
 
-				{#each quizQuestions[currentQuestion].listOfFalseAnswers as answer, index}
+				{#if quizQuestions[currentQuestion].listOfFalseAnswers !== undefined}
+					{#each quizQuestions[currentQuestion].listOfFalseAnswers as answer, index}
+						<div class="form-check">
+							<input
+								class="form-check-input"
+								type="radio"
+								id={`answer-${index}`}
+								name="answer"
+								value={index}
+								bind:group={selectedAnswer}
+								disabled={gameMode === 'COOP' && lobbyData.playerVotes[user.uid] !== undefined}
+							/>
+							<label class="form-check-label" for={`answer-${index}`}>
+								{answer}
+							</label>
+						</div>
+					{/each}
 					<div class="form-check">
 						<input
 							class="form-check-input"
 							type="radio"
-							id={`answer-${index}`}
+							id={`answer-correct`}
 							name="answer"
-							value={index}
+							value={42}
 							bind:group={selectedAnswer}
+							disabled={gameMode === 'COOP' && lobbyData.playerVotes[user.uid] !== undefined}
 						/>
-						<label class="form-check-label" for={`answer-${index}`}>
-							{answer}
+						<label class="form-check-label" for={`answer-correct`}>
+							{quizQuestions[currentQuestion].correctAnswer}
 						</label>
 					</div>
-				{/each}
-				<div class="form-check">
-					<input
-						class="form-check-input"
-						type="radio"
-						id={`answer-correct`}
-						name="answer"
-						value={42}
-						bind:group={selectedAnswer}
-					/>
-					<label class="form-check-label" for={`answer-correct`}>
-						{quizQuestions[currentQuestion].correctAnswer}
-					</label>
-				</div>
+				{/if}
 
-				<button on:click={() => checkAnswer()}>Submit</button>
+				{#if gameMode === 'SOLO'}
+					<button on:click={() => checkAnswer()}>Submit</button>
+				{:else if gameMode === 'COOP'}
+					<p> You have voted: {lobbyData.playerVotes[user.uid]}</p>
+					<button on:click={() => voteForAnswer()} disabled={lobbyData.playerVotes[user.uid] !== undefined}>Vote</button>
+				{/if}
 
-				{#if correctAnswer === true}
+				{#if answerIsCorrect === true}
 					<div class="alert alert-success" role="alert">Correct answer!</div>
-				{:else if correctAnswer === false}
+				{:else if answerIsCorrect === false}
 					<div class="alert alert-danger" role="alert">Incorrect answer!</div>
 				{/if}
 
 				<Progress value={countdown} max={20} animated striped />
 			{:else}
 				<p>Game Over!</p>
-				<p>You've answered {score} of {quizQuestions.length} questions correctlty.</p>
+				<p>You've answered {personalScore} of {quizQuestions.length} questions correctly.</p>
+				{#if gameMode === 'COOP'}
+					<p>Your team answered {lobbyData.score} of {quizQuestions.length} questions correctly together.</p>
+				{/if}
 				<div>
 					<Button on:click={() => leaveLobby()}>Leave Game</Button>
 				</div>
