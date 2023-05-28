@@ -25,6 +25,7 @@
       const success = await leaveLobby(uid, lobbyToLeaveID);
       if (success) {
         lobbyID = "";
+        selectedStacks = [];
         setTimeout(() => {currentlyLeavingLobby = false}, 1000)
         console.log('Left the lobby.');
       }

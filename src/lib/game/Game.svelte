@@ -13,13 +13,14 @@
 	export let questionStacks: string[];
 	export let COUNTDOWN_LIMIT: number;
 
+	const MAX_QUESTION_NUMBER = 3;
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
 	let answerIsCorrect: boolean | null = null;
 	let personalScore = 0;
 	let countdown = COUNTDOWN_LIMIT;
 	let countdownIntervalID: any = null;
-	let quizQuestions: any;
+	let quizQuestions: any[] = [];
 
 
 	async function leaveGameLobby(): Promise<void> {
@@ -168,15 +169,25 @@
 		const stacksQuery = query(collection(db, 'stack'), where('__name__', 'in', qStacks));
 		const stacksSnapshot = await getDocs(stacksQuery);
 		let stacksNestedData = stacksSnapshot.docs.map(doc => doc.data().quizzes);
-		let stacksQuizIDs: any[] = [];
+		// let stacksQuizIDs: any[] = [];
 		for (const id of stacksNestedData[0]) {
-			stacksQuizIDs.push(id);
+			if (quizQuestions.length >= MAX_QUESTION_NUMBER) {
+				continue;
+			}
+			const singleQuizQuery = query(collection(db, 'quiz'), where('__name__', '==', id));
+			let singleQuizData = await getDocs(singleQuizQuery);
+			console.log(singleQuizData.docs.length);
+			if (singleQuizData.docs.length === 1) {
+				console.log(singleQuizData.docs[0].data());
+				quizQuestions.push(singleQuizData.docs[0].data());
+			}
 		}
 
-		const quizzesQuery = query(collection(db, 'quiz'), where('__name__', 'in', stacksQuizIDs));
-		let snap2quizzesSnapshot = await getDocs(quizzesQuery);
 
-		quizQuestions = snap2quizzesSnapshot.docs.map(doc => doc.data());
+		// const quizzesQuery = query(collection(db, 'quiz'), where('__name__', 'in', stacksQuizIDs));
+		// let snap2quizzesSnapshot = await getDocs(quizzesQuery);
+
+		// quizQuestions = snap2quizzesSnapshot.docs.map(doc => doc.data());
 	}
 
 	window.addEventListener('unhandledrejection', function(event) {
@@ -194,7 +205,7 @@
 		{#if !quizQuestions}
 			<p>starting...</p>
 		{:else}
-			{#if currentQuestion < quizQuestions.length && currentQuestion < 6}
+			{#if currentQuestion < quizQuestions.length && currentQuestion < 10}
 				<h2>Question {currentQuestion + 1}</h2>
 				<p>{quizQuestions[currentQuestion].question}</p>
 
@@ -234,7 +245,6 @@
 				{#if gameMode === 'SOLO'}
 					<button on:click={() => checkAnswer()}>Submit</button>
 				{:else if gameMode === 'COOP'}
-					<p> You have voted: {lobbyData.playerVotes[user.uid]}</p>
 					<button on:click={() => voteForAnswer()} disabled={lobbyData.playerVotes[user.uid] !== undefined}>Vote</button>
 				{/if}
 
