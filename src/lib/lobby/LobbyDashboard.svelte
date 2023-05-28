@@ -2,6 +2,7 @@
   import { Button, ListGroup, ListGroupItem, FormGroup, Label, Input } from 'sveltestrap';
   import { Doc, Collection } from 'sveltefire';
   import { saveLobbySettings } from '../../routes/api/saveLobbySettings/saveLobbySettings';
+	import { onMount } from 'svelte';
 
   export let lobbyID: string;
   export let loggedInUser: any;
@@ -25,6 +26,9 @@
       alert("Error joining lobby: " +  typedError.message);
     }
   }
+  onMount( async () => {
+    selectedStacks = [];
+  })
 </script>
 
 <div class="lobby-container">
