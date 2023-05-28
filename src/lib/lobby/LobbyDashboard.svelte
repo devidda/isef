@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, ListGroup, ListGroupItem, FormGroup, Label, Input } from 'sveltestrap';
   import { Doc, Collection } from 'sveltefire';
+  import { saveLobbySettings } from '../../routes/api/saveLobbySettings/saveLobbySettings';
 
   export let lobbyID: string;
   export let loggedInUser: any;
@@ -13,17 +14,8 @@
 
   async function saveSettings(): Promise<void> {
     try {
-      // call server function to update lobby settings in Firestore
-      const response = await fetch('/api/saveLobbySettings', {
-          method: 'POST',
-          body: JSON.stringify({ selectedMode, selectedStacks, lobbyID, timeLimit }),
-          headers: {
-              'content-type': 'application/json'
-          }
-      });
-      const success = await response.json();
-
-      if (response.ok && success) {
+      const success = await saveLobbySettings(selectedMode, selectedStacks, lobbyID, timeLimit);
+      if (success) {
         alert('Settings saved!');
       };
 

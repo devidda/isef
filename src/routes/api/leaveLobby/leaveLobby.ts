@@ -1,17 +1,10 @@
-import type { RequestHandler } from './$types';
-import type { Config } from '@sveltejs/adapter-vercel';
-import { json } from '@sveltejs/kit';
 import { db } from '$lib/firebase/firebase'
 import { doc, updateDoc, deleteDoc, arrayRemove, getDoc } from '@firebase/firestore';
 
-export const config: Config = {
-  runtime: 'edge',
-};
 
-export const POST = (async ({ request }) => {
+export async function leaveLobby(uid: string, lobbyToLeaveID: string): Promise<boolean> {
   try {
     // get data from request
-    const { uid, lobbyToLeaveID } = await request.json();
     if (!uid || !lobbyToLeaveID ) {
       throw new Error('One of the parameters has been failed to delivered!')
     }
@@ -35,13 +28,13 @@ export const POST = (async ({ request }) => {
         }
       }
 
-      return json(true);
+      return true;
     }
     throw new Error('Failed to leave lobby.')
 
   } catch (error) {
     const typedError = error as Error;
     console.error('Error leaving lobby:', typedError.message);
-    return json(false);
+    return false;
   }
-}) satisfies RequestHandler;
+};

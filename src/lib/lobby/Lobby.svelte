@@ -5,6 +5,7 @@
 	import PreLobby from './PreLobby.svelte';
 	import LobbyDashboard from './LobbyDashboard.svelte';
 	import Game from '$lib/game/Game.svelte';
+  import { leaveLobby } from '../../routes/api/leaveLobby/leaveLobby';
 
   let gameInProgress = false;
   let selectedStacks: string[] = [];
@@ -13,7 +14,7 @@
   let lobbyID = "";
   let currentlyLeavingLobby = false;
 
-	async function leaveLobby(uid: string): Promise<void> {
+	async function leaveGameLobby(uid: string): Promise<void> {
     try {
       // hacky solution to disable instant rejoining of lobby due to 
       // the delay between the api-call and the acutally deleted lobby.
@@ -21,17 +22,8 @@
       currentlyLeavingLobby = true;
       const lobbyToLeaveID = lobbyID;
 
-      // call server function to add user to Firestore
-      const response = await fetch('/api/leaveLobby', {
-          method: 'POST',
-          body: JSON.stringify({ uid, lobbyToLeaveID }),
-          headers: {
-              'content-type': 'application/json'
-          }
-      });
-      const success = await response.json();
-
-      if (response.ok && success) {
+      const success = await leaveLobby(uid, lobbyToLeaveID);
+      if (success) {
         lobbyID = "";
         setTimeout(() => {currentlyLeavingLobby = false}, 1000)
         console.log('Left the lobby.');
@@ -89,7 +81,7 @@
             <Doc ref={`lobby/${lobbyID}`} let:data={lobbyData}>
               <Button class="start-game-button" color="primary" on:click={() => startGame(lobbyData.questionStacks)} disabled={(lobbyData.listOfUsers[0] === loggedInUser.uid) ? false : true}>Start Game</Button>
             </Doc>
-          <Button class="leave-game-button" color="primary" on:click={() => leaveLobby(loggedInUser.uid)}>Leave Lobby</Button>
+          <Button class="leave-game-button" color="primary" on:click={() => leaveGameLobby(loggedInUser.uid)}>Leave Lobby</Button>
         {/if}
       </Doc>
       {:else}

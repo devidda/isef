@@ -21,7 +21,7 @@
 {#if $user}
 	{#if $user.metadata.creationTime === $user.metadata.lastSignInTime}
 		<!-- new user -->
-		<p>Hi {$user.displayName}! Let's get those points rolling! 💪</p>
+		<p>Hi {$user.displayName}! Welcome to the Quiz!</p>
 	{:else}
 		<!-- existing user -->
 		<p>Welcome back {$user.displayName}!</p>
