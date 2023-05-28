@@ -4,6 +4,7 @@
 	import { db } from '$lib/firebase/firebase';
 	import { collection, getDocs, query, where, updateDoc, doc, getDoc } from 'firebase/firestore';
 	import { onMount } from 'svelte';
+	import { leaveLobby } from '../../routes/api/leaveLobby/leaveLobby';
 
 	export let lobbyID: string;
 	export let user: any;
@@ -21,22 +22,11 @@
 	let quizQuestions: any;
 
 
-	async function leaveLobby(): Promise<void> {
+	async function leaveGameLobby(): Promise<void> {
 		try {
-			const lobbyToLeaveID = lobbyID;
-			const uid = user.uid;
+			const success = await leaveLobby(user.uid, lobbyID);
 
-			// call server function to remove user from Firestore lobby
-			const response = await fetch('/api/leaveLobby', {
-				method: 'POST',
-				body: JSON.stringify({ uid, lobbyToLeaveID }),
-				headers: {
-					'content-type': 'application/json'
-				}
-			});
-			const success = await response.json();
-
-			if (response.ok && success) {
+			if (success) {
 				lobbyID = "";
 
 				setTimeout(() => {
@@ -110,7 +100,7 @@
 		// stop countdown
 		clearInterval(countdownIntervalID);
 
-		if (selectedAnswer) {
+		if (Number.isInteger(selectedAnswer)) {
 			if (selectedAnswer === 42) {
 				personalScore++;
 				answerIsCorrect = true;
@@ -254,7 +244,7 @@
 					<div class="alert alert-danger" role="alert">Incorrect answer!</div>
 				{/if}
 
-				<Progress value={countdown} max={20} animated striped />
+				<Progress value={countdown} max={COUNTDOWN_LIMIT} animated striped />
 			{:else}
 				<p>Game Over!</p>
 				<p>You've answered {personalScore} of {quizQuestions.length} questions correctly.</p>
@@ -262,7 +252,7 @@
 					<p>Your team answered {lobbyData.score} of {quizQuestions.length} questions correctly together.</p>
 				{/if}
 				<div>
-					<Button on:click={() => leaveLobby()}>Leave Game</Button>
+					<Button on:click={() => leaveGameLobby()}>Leave Game</Button>
 				</div>
 			{/if}
 		{/if}
