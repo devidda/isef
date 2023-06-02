@@ -13,7 +13,7 @@
 	export let questionStacks: string[];
 	export let COUNTDOWN_LIMIT: number;
 
-	const MAX_QUESTION_NUMBER = 3;
+	const MAX_QUESTION_NUMBER = 99;
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
 	let answerIsCorrect: boolean | null = null;
@@ -205,7 +205,7 @@
 		{#if !quizQuestions}
 			<p>starting...</p>
 		{:else}
-			{#if currentQuestion < quizQuestions.length && currentQuestion < 10}
+			{#if currentQuestion < quizQuestions.length}
 				<h2>Question {currentQuestion + 1}</h2>
 				<p>{quizQuestions[currentQuestion].question}</p>
 
