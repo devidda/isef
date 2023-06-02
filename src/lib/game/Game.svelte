@@ -205,7 +205,7 @@
 		{#if !quizQuestions}
 			<p>starting...</p>
 		{:else}
-			{#if currentQuestion < quizQuestions.length && currentQuestion < 10}
+			{#if currentQuestion < quizQuestions.length}
 				<h2>Question {currentQuestion + 1}</h2>
 				<p>{quizQuestions[currentQuestion].question}</p>
 
