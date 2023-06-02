@@ -13,7 +13,7 @@
 	export let questionStacks: string[];
 	export let COUNTDOWN_LIMIT: number;
 
-	const MAX_QUESTION_NUMBER = 3;
+	const MAX_QUESTION_NUMBER = 99;
 	let currentQuestion = 0;
 	let selectedAnswer: any = null;
 	let answerIsCorrect: boolean | null = null;
